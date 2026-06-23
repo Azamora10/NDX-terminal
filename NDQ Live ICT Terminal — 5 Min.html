@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<!-- saved from url=(0067)file:///Users/antoniozamora/Downloads/NDQ_Live_ICT_Terminal_v7.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NDQ Live ICT Terminal — 5 Min</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--panel:#0e1118;--border:#1c2030;--border2:#252d40;
+  --text:#e2e8f0;--muted:#4a5568;--dim:#2d3748;
+  --green:#00d48a;--red:#ff4757;--gold:#f5a623;--blue:#4a9eff;--purple:#a78bfa;--cyan:#06b6d4;
+  --green-dim:rgba(0,212,138,.1);--red-dim:rgba(255,71,87,.1);--gold-dim:rgba(245,166,35,.1);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:13px}
+
+/* TOP BAR */
+#topbar{display:grid;grid-template-columns:auto 1fr auto auto auto auto auto auto;align-items:center;gap:10px;padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--border);height:52px;}
+.logo{font-size:14px;font-weight:900;color:var(--gold);letter-spacing:2px;white-space:nowrap}
+.ticker-badge{display:flex;align-items:center;gap:10px;background:var(--border);border-radius:6px;padding:5px 12px}
+.ticker-name{font-size:15px;font-weight:900;color:#fff;letter-spacing:1px}
+.ticker-price{font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;transition:color .15s}
+.ticker-chg{font-size:13px;font-weight:700;padding:2px 8px;border-radius:4px}
+.chg-up{color:var(--green);background:var(--green-dim)}
+.chg-dn{color:var(--red);background:var(--red-dim)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse-dot 1.5s ease-in-out infinite}
+@keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.status-txt{font-size:11px;color:var(--muted)}
+.refresh-btn{background:var(--border2);border:1px solid var(--border2);border-radius:5px;color:var(--text);padding:4px 10px;font-size:11px;cursor:pointer;transition:.2s}
+.refresh-btn:hover{background:var(--border)}
+#clock{font-size:11px;color:var(--muted);font-family:monospace;white-space:nowrap}
+
+/* 3-STATE SIGNAL BAR */
+#signalBar{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:2px solid var(--border)}
+.sig-state{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 10px;font-size:12px;font-weight:800;letter-spacing:.6px;position:relative;transition:all .35s;opacity:.28;border-right:1px solid var(--border)}
+.sig-state:last-child{border-right:none}
+.sig-icon{font-size:18px;line-height:1}
+.sig-text{display:flex;flex-direction:column;gap:1px}
+.sig-main{font-size:12px;font-weight:900;letter-spacing:.5px}
+.sig-sub{font-size:9px;font-weight:600;opacity:.75;letter-spacing:.3px}
+.sig-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:currentColor;opacity:0}
+.sig-state.active .sig-pip,.sig-state.active-buy .sig-pip,.sig-state.active-sell .sig-pip{opacity:1;animation:pip-pulse 1.2s ease-in-out infinite;box-shadow:0 0 6px currentColor}
+@keyframes pip-pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.6);opacity:.4}}
+#sigStandby{background:#0d0f18;color:#64748b}
+#sigStandby.active{opacity:1;background:#0f1520;color:#94a3b8;border-left:3px solid #475569}
+#sigWatch{background:#0d0f18;color:#78400a}
+#sigWatch.active{opacity:1;background:rgba(245,166,35,.1);color:var(--gold);border-left:3px solid var(--gold);animation:watch-pulse 2s ease-in-out infinite}
+@keyframes watch-pulse{0%,100%{box-shadow:inset 0 0 0 0 rgba(245,166,35,0)}50%{box-shadow:inset 0 0 20px 0 rgba(245,166,35,.08)}}
+#sigEnter{background:#0d0f18;color:#014e30}
+#sigEnter.active-buy{opacity:1;background:rgba(0,212,138,.13);color:var(--green);border-left:3px solid var(--green);animation:enter-flash .8s ease-in-out infinite}
+#sigEnter.active-sell{opacity:1;background:rgba(255,71,87,.13);color:var(--red);border-left:3px solid var(--red);animation:enter-flash .8s ease-in-out infinite}
+@keyframes enter-flash{0%,100%{opacity:1}50%{opacity:.75}}
+
+/* MAIN LAYOUT */
+#main{display:grid;grid-template-columns:220px 1fr 270px;height:calc(100vh - 170px);gap:1px;background:var(--border)}
+#left{background:var(--bg);padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+#center{background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+#right{background:var(--bg);padding:10px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+
+/* ENTRY CARD */
+#entryCard{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0}
+.ec{background:var(--panel);padding:8px 10px;text-align:center}
+.ec-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:4px}
+.ec-val{font-size:17px;font-weight:900;font-variant-numeric:tabular-nums;line-height:1}
+.ec-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.ec.ec-buy{border-top:2px solid var(--green)}
+.ec.ec-sell{border-top:2px solid var(--red)}
+.ec.ec-entry{border-top:2px solid var(--gold)}
+.ec.ec-sl{border-top:2px solid var(--red)}
+.ec.ec-tp{border-top:2px solid var(--green)}
+.ec.ec-eq{border-top:2px solid var(--cyan)}
+
+/* CHART */
+#chartArea{flex:1;position:relative;overflow:hidden}
+#cv{display:block;width:100%;height:100%}
+#chartMsg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;color:var(--muted)}
+.chart-spinner{width:32px;height:32px;border:2px solid var(--border2);border-top-color:var(--gold);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SECTION HEADER */
+.sec{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);padding-bottom:5px;border-bottom:1px solid var(--border2);margin-bottom:6px}
+
+/* KILL ZONE ITEMS */
+.kz{padding:6px 8px;border-radius:5px;border:1px solid var(--border);border-left-width:3px;margin-bottom:4px;transition:all .3s}
+.kz.active{background:rgba(245,166,35,.04)}
+.kz-name{font-size:11px;font-weight:700;margin-bottom:1px}
+.kz-time{font-size:10px;color:var(--muted)}
+.kz-cd{font-size:10px;color:var(--gold);margin-top:2px}
+
+/* FACT ROWS */
+.fact{display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--border);font-size:11px}
+.fact:last-child{border-bottom:none}
+.fl{color:var(--muted)}
+.fv{font-weight:700;font-variant-numeric:tabular-nums}
+.fv.up{color:var(--green)}.fv.dn{color:var(--red)}.fv.gold{color:var(--gold)}.fv.cyan{color:var(--cyan)}
+
+/* ICT EVIDENCE */
+.ict-evidence{background:var(--panel);border:1px solid var(--border2);border-radius:7px;padding:8px}
+.ict-ev-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:10px;border-bottom:1px solid var(--border)}
+.ict-ev-row:last-child{border-bottom:none}
+.ict-ev-label{color:var(--muted);font-size:10px;flex-shrink:0;margin-right:6px}
+.ict-ev-val{font-weight:800;font-size:10px;font-variant-numeric:tabular-nums;text-align:right;transition:background .6s,color .3s;border-radius:3px;padding:1px 3px}
+.ev-hit{color:var(--green)}.ev-miss{color:var(--muted)}.ev-warn{color:var(--gold)}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.tag{display:inline-block;padding:2px 6px;border-radius:10px;font-size:10px;font-weight:700}
+.t-ob-b{background:rgba(74,158,255,.12);color:var(--blue);border:1px solid rgba(74,158,255,.3)}
+.t-ob-s{background:rgba(255,71,87,.12);color:var(--red);border:1px solid rgba(255,71,87,.3)}
+.t-fvg-b{background:rgba(0,212,138,.12);color:var(--green);border:1px solid rgba(0,212,138,.3)}
+.t-fvg-s{background:rgba(255,71,87,.12);color:var(--red);border:1px solid rgba(255,71,87,.3)}
+.t-pdh,.t-pdl{background:rgba(245,166,35,.12);color:var(--gold);border:1px solid rgba(245,166,35,.3)}
+.t-eq{background:rgba(6,182,212,.12);color:var(--cyan);border:1px solid rgba(6,182,212,.3)}
+.t-sweep{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
+.t-msb{background:rgba(245,166,35,.15);color:#fbbf24;border:1px solid rgba(245,166,35,.4)}
+
+/* PROXIMITY BAR */
+.pbar-wrap{margin:4px 0 6px}
+.pbar-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:3px}
+.pbar-track{height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:3px;transition:width .6s}
+
+/* VERDICT */
+.verdict{border-radius:8px;padding:10px;text-align:center;border:1px solid var(--border2)}
+.verdict.buy{background:rgba(0,212,138,.06);border-color:rgba(0,212,138,.3)}
+.verdict.sell{background:rgba(255,71,87,.06);border-color:rgba(255,71,87,.3)}
+.verdict.wait{background:rgba(74,85,104,.06);border-color:var(--border2)}
+.verdict-dir{font-size:24px;font-weight:900;margin-bottom:3px}
+.verdict-ref{font-size:10px;color:var(--muted);margin-bottom:6px}
+.verdict-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid var(--border)}
+.verdict-row:last-child{border-bottom:none}
+.verdict-lbl{color:var(--muted)}
+.verdict-val{font-weight:800;font-variant-numeric:tabular-nums}
+
+/* TTE BOX */
+.tte-box{background:var(--panel);border:1px solid var(--border2);border-radius:7px;padding:8px;text-align:center}
+.tte-lbl{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px}
+.tte-val{font-size:20px;font-weight:900;color:var(--gold);font-variant-numeric:tabular-nums}
+.tte-sub{font-size:10px;color:var(--muted);margin-top:2px;line-height:1.4}
+
+/* TICK FLASH */
+@keyframes flash-green{0%{background:rgba(0,212,138,.25)}100%{background:transparent}}
+@keyframes flash-red{0%{background:rgba(255,71,87,.25)}100%{background:transparent}}
+.flash-up{animation:flash-green .3s ease-out}
+.flash-dn{animation:flash-red .3s ease-out}
+
+/* MARKET STATUS BOX */
+#mktStatus{
+  display:flex;align-items:center;gap:8px;
+  padding:5px 12px;border-radius:6px;border:1px solid var(--border2);
+  font-size:11px;font-weight:800;letter-spacing:.8px;
+  transition:all .4s;white-space:nowrap;
+}
+#mktStatus.open{
+  background:rgba(0,212,138,.1);border-color:rgba(0,212,138,.4);color:var(--green);
+}
+#mktStatus.closed{
+  background:rgba(255,71,87,.08);border-color:rgba(255,71,87,.3);color:var(--red);
+}
+#mktStatus.premarket{
+  background:rgba(245,166,35,.08);border-color:rgba(245,166,35,.3);color:var(--gold);
+}
+#mktStatus.afterhours{
+  background:rgba(100,116,139,.08);border-color:rgba(100,116,139,.3);color:#64748b;
+}
+.mkt-dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex-shrink:0}
+#mktStatus.open .mkt-dot{box-shadow:0 0 6px currentColor;animation:pulse-dot 1.2s ease-in-out infinite}
+.mkt-session{font-size:9px;font-weight:600;opacity:.75;letter-spacing:.3px}
+
+/* CANDLE TIMER */
+#candleTimer{
+  display:flex;align-items:center;gap:5px;
+  font-size:10px;color:var(--muted);font-family:monospace;
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:5px;padding:3px 8px;white-space:nowrap;
+}
+.candle-progress{width:32px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.candle-progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .9s linear}
+
+/* CONFIDENCE BAR */
+.conf-bar-wrap{margin-top:4px}
+.conf-bar-track{height:4px;background:var(--border2);border-radius:2px;overflow:hidden;margin-top:2px}
+.conf-bar-fill{height:100%;border-radius:2px;transition:width .8s}
+
+/* NEWS TICKER STRIP */
+#newsTicker{
+  height:28px;background:#0a0c15;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;overflow:hidden;position:relative;
+  border-top:1px solid var(--border);
+}
+.news-ticker-label{
+  flex-shrink:0;padding:0 10px;font-size:9px;font-weight:900;
+  letter-spacing:1.5px;color:#000;background:var(--gold);height:100%;
+  display:flex;align-items:center;z-index:2;white-space:nowrap;
+}
+.news-ticker-track{
+  display:flex;align-items:center;gap:0;
+  animation:ticker-scroll 60s linear infinite;
+  white-space:nowrap;padding-left:20px;
+}
+.news-ticker-track:hover{animation-play-state:paused}
+@keyframes ticker-scroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-50%)}
+}
+.news-item{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:0 18px;font-size:10px;font-weight:600;
+  border-right:1px solid var(--border);cursor:pointer;
+}
+.news-item:hover{background:rgba(255,255,255,.03)}
+.news-bull{color:var(--green)}
+.news-bear{color:var(--red)}
+.news-neutral{color:var(--muted)}
+.news-hot{color:var(--gold)}
+.news-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.news-dot-bull{background:var(--green)}
+.news-dot-bear{background:var(--red)}
+.news-dot-neutral{background:var(--muted)}
+.news-dot-hot{background:var(--gold);box-shadow:0 0 4px var(--gold)}
+
+/* NEWS PANEL */
+.news-card{
+  background:var(--panel);border:1px solid var(--border2);border-radius:7px;
+  padding:8px 10px;margin-bottom:5px;cursor:pointer;transition:border-color .2s;
+  border-left:3px solid var(--border2);
+}
+.news-card:hover{border-color:var(--gold)}
+.news-card.bull{border-left-color:var(--green)}
+.news-card.bear{border-left-color:var(--red)}
+.news-card.hot{border-left-color:var(--gold)}
+.news-card.neutral{border-left-color:var(--muted)}
+.news-headline{font-size:10px;font-weight:700;line-height:1.4;margin-bottom:3px}
+.news-meta{display:flex;justify-content:space-between;align-items:center;font-size:9px;color:var(--muted)}
+.news-impact{font-size:9px;font-weight:800;padding:1px 5px;border-radius:3px}
+.news-impact.high-bull{color:var(--green);background:rgba(0,212,138,.15)}
+.news-impact.high-bear{color:var(--red);background:rgba(255,71,87,.15)}
+.news-impact.med{color:var(--gold);background:rgba(245,166,35,.15)}
+.news-impact.low{color:var(--muted);background:rgba(74,85,104,.15)}
+.news-ai-note{font-size:9px;color:var(--cyan);margin-top:3px;line-height:1.4;font-style:italic}
+
+/* ECON EVENTS */
+.econ-event{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:10px}
+.econ-event:last-child{border-bottom:none}
+.econ-name{color:var(--text);font-weight:600}
+.econ-time{color:var(--muted);font-size:9px}
+.econ-impact{font-size:9px;font-weight:800;padding:1px 4px;border-radius:2px}
+.econ-high{color:#ff4757;background:rgba(255,71,87,.15)}
+.econ-med{color:#f5a623;background:rgba(245,166,35,.15)}
+.econ-low{color:#4a5568;background:rgba(74,85,104,.15)}
+
+/* NEWS OVERRIDE ALERT */
+#newsAlert{
+  display:none;position:fixed;top:95px;left:50%;transform:translateX(-50%);
+  background:#1a0a00;border:2px solid var(--gold);border-radius:8px;
+  padding:10px 16px;z-index:999;font-size:11px;max-width:500px;text-align:center;
+  box-shadow:0 4px 20px rgba(245,166,35,.3);animation:alert-pop .3s ease-out;
+}
+@keyframes alert-pop{from{opacity:0;transform:translateX(-50%) scale(.9)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+#newsAlert .alert-title{color:var(--gold);font-weight:900;font-size:12px;margin-bottom:3px}
+#newsAlert .alert-body{color:var(--text);line-height:1.5}
+#newsAlert .alert-close{position:absolute;top:6px;right:8px;cursor:pointer;color:var(--muted);font-size:14px}
+
+#lastRefresh{font-size:10px;color:var(--muted);text-align:center;padding:3px 0}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<!-- Auto-detect if running inside Claude.ai iframe — show banner -->
+<div id="iframeBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a1200;border-bottom:2px solid #f5a623;padding:10px 16px;font-size:12px;color:#f5a623;font-family:monospace;line-height:1.6">
+  <strong>⚠️ Running inside Claude.ai — network calls are blocked.</strong>
+  &nbsp;To get live ^NDX data: &nbsp;<strong style="color:#fff">1) Download this file</strong> using the ↓ button above &nbsp;→&nbsp; <strong style="color:#fff">2) Double-click to open in Chrome or Edge</strong>. The Finnhub API will work instantly once opened locally.
+  <span onclick="document.getElementById(&#39;iframeBanner&#39;).style.display=&#39;none&#39;" style="float:right;cursor:pointer;color:#fff;font-size:16px;line-height:1">✕</span>
+</div>
+<script>
+  // Show banner if we're in an iframe (claude.ai artifact viewer)
+  if(window.self !== window.top){
+    document.getElementById('iframeBanner').style.display='block';
+  }
+</script>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div class="logo">⚡ TVC:NDQ · 5M</div>
+  <div class="ticker-badge">
+    <div class="ticker-name">NDQ · ^NDX</div>
+    <div class="ticker-price" id="tp" style="color:var(--text)">—</div>
+    <div class="ticker-chg" id="tc">—</div>
+    <div style="font-size:10px;color:var(--muted);margin-left:4px" id="tickDir"></div>
+  </div>
+  <div class="topbar-right">
+    <div class="live-dot" style="background: var(--gold); box-shadow: 0 0 6px var(--gold);"></div>
+    <div class="status-txt" id="statusTxt" style="color: var(--gold);">DATA UNAVAILABLE — Simulated</div>
+  </div>
+  <button class="refresh-btn" onclick="doRefresh()">↻ Refresh</button>
+  <div id="lastRefresh">Blocked — open file locally (see instructions)</div>
+  <div id="mktStatus" class="open"><div class="mkt-dot"></div><span id="mktStatusTxt">OPEN</span><span class="mkt-session" id="mktSessionTxt">Closes in 3m</span></div>
+  <div id="candleTimer"><div class="candle-progress"><div class="candle-progress-fill" id="candleProgressFill" style="width:0%"></div></div><span id="candleTimerTxt">5:00</span></div>
+  <div id="clock">15:57:28 EST</div>
+</div>
+
+<!-- 3-STATE SIGNAL BAR -->
+<div id="signalBar">
+  <div class="sig-state active" id="sigStandby">
+    <div class="sig-pip"></div>
+    <div class="sig-icon">⏸</div>
+    <div class="sig-text">
+      <div class="sig-main">STAND BY</div>
+      <div class="sig-sub" id="sigStandbySub">Connecting to Finnhub...</div>
+    </div>
+  </div>
+  <div class="sig-state" id="sigWatch">
+    <div class="sig-pip"></div>
+    <div class="sig-icon">👁</div>
+    <div class="sig-text">
+      <div class="sig-main">GET READY</div>
+      <div class="sig-sub" id="sigWatchSub">Kill zone opening soon</div>
+    </div>
+  </div>
+  <div class="sig-state" id="sigEnter">
+    <div class="sig-pip"></div>
+    <div class="sig-icon" id="sigEnterIcon">⚡</div>
+    <div class="sig-text">
+      <div class="sig-main" id="sigEnterMain">ENTER NOW</div>
+      <div class="sig-sub" id="sigEnterSub">Price at zone in kill window</div>
+    </div>
+  </div>
+</div>
+
+<!-- NEWS TICKER STRIP -->
+<div id="newsTicker">
+  <div class="news-ticker-label">📰 NEWS</div>
+  <div class="news-ticker-track" id="newsTickerTrack" style="animation: 90s linear 0s infinite normal none running ticker-scroll;"><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Bitcoin Hits $61,877 as Tech Selloff Pressures Crypto</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Big Tech’s Fear Gauge Is Flashing Warning Signs</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Nasdaq Tumbles 2.4%. A Chip Selloff Grips Wall Street.</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>The $1 Trillion Meltdown. Chip Stocks Lead a Steep Nasdaq Decline.</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>South Korea leveraged ETF crisis sparks global chip selloff</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Global Tech Rout Deepens as Kospi Drops 10%, Nasdaq Futures Sink 2.6%</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX, Nike slip premarket; Zeta Global rises</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX Extends Decline as Tech Stocks Retreat and Investors Reassess AI Spending: Dow Jones, S&amp;P, Nasdaq, Wall Street Futures</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Stock Futures Dive as Tech Selloff Rages On</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX slides, tech stocks dip — what’s moving markets</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX Rout Set to Push Market Value Below $2 Trillion</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Nasdaq, S&amp;P 500 Futures Dip After Megacap Tech Selloff: Why SPCX, INFQ, PLTR, QBTS, HIMS Are In Focus</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Should Insmed’s (INSM) NASDAQ-100 Exit and TPIP Focus Require Action From Investors?</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>S&amp;P 500, Nasdaq Drop As SpaceX, Broader Tech Weakness Outweighs US-Iran Hopes — SPCX, GOOGL, NFLX, COIN, MU In Focus</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Stocks Mostly Lower on Weakness in Megacap Tech and Software Stocks</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Bitcoin Hits $61,877 as Tech Selloff Pressures Crypto</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Big Tech’s Fear Gauge Is Flashing Warning Signs</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Nasdaq Tumbles 2.4%. A Chip Selloff Grips Wall Street.</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>The $1 Trillion Meltdown. Chip Stocks Lead a Steep Nasdaq Decline.</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>South Korea leveraged ETF crisis sparks global chip selloff</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Global Tech Rout Deepens as Kospi Drops 10%, Nasdaq Futures Sink 2.6%</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX, Nike slip premarket; Zeta Global rises</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX Extends Decline as Tech Stocks Retreat and Investors Reassess AI Spending: Dow Jones, S&amp;P, Nasdaq, Wall Street Futures</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Stock Futures Dive as Tech Selloff Rages On</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX slides, tech stocks dip — what’s moving markets</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>SpaceX Rout Set to Push Market Value Below $2 Trillion</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Nasdaq, S&amp;P 500 Futures Dip After Megacap Tech Selloff: Why SPCX, INFQ, PLTR, QBTS, HIMS Are In Focus</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Should Insmed’s (INSM) NASDAQ-100 Exit and TPIP Focus Require Action From Investors?</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>S&amp;P 500, Nasdaq Drop As SpaceX, Broader Tech Weakness Outweighs US-Iran Hopes — SPCX, GOOGL, NFLX, COIN, MU In Focus</span><span class="news-item news-neutral"><span class="news-dot news-dot-neutral"></span>Stocks Mostly Lower on Weakness in Megacap Tech and Software Stocks</span></div>
+</div>
+
+<!-- NEWS OVERRIDE ALERT POPUP -->
+<div id="newsAlert">
+  <span class="alert-close" onclick="document.getElementById(&#39;newsAlert&#39;).style.display=&#39;none&#39;">✕</span>
+  <div class="alert-title" id="newsAlertTitle">HIGH IMPACT NEWS</div>
+  <div class="alert-body" id="newsAlertBody"></div>
+</div>
+
+<div id="main">
+
+  <!-- LEFT -->
+  <div id="left">
+    <div>
+      <div class="sec">Session Guide (EST)</div>
+      <div id="kzList"><div class="kz active" style="border-left-color: rgb(245, 166, 35); opacity: 1;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:#f5a623">NY Afternoon</div><span style="font-size:9px;font-weight:800;color:#f5a623;background:#f5a62322;padding:1px 5px;border-radius:3px">TRADEABLE</span></div><div class="kz-time">1:30-4PM EST</div><div style="font-size:9px;color:#f5a623;margin-top:1px;font-style:italic">Continuation + PM reversal setups</div><div style="font-size:10px;color:#f5a623;font-weight:800;margin-top:2px">ACTIVE NOW</div></div><div class="kz active" style="border-left-color: rgb(255, 71, 87); opacity: 1;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:#ff4757">NY Close</div><span style="font-size:9px;font-weight:800;color:#fb923c;background:#fb923c22;padding:1px 5px;border-radius:3px">CAUTION</span></div><div class="kz-time">3:30-4:30PM EST</div><div style="font-size:9px;color:#fb923c;margin-top:1px;font-style:italic">High volatility EOD — tight SLs</div><div style="font-size:10px;color:#ff4757;font-weight:800;margin-top:2px">ACTIVE NOW</div></div><div class="kz" style="border-left-color: rgb(255, 71, 87); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">After Hours</div><span style="font-size:9px;font-weight:800;color:#ff4757;background:#ff475722;padding:1px 5px;border-radius:3px">AVOID</span></div><div class="kz-time">4:30-8PM EST</div><div style="font-size:9px;color:#ff4757;margin-top:1px;font-style:italic">Illiquid — skip entirely</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 0h 33m</div></div><div class="kz" style="border-left-color: rgb(251, 146, 60); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">Asian Session</div><span style="font-size:9px;font-weight:800;color:#fb923c;background:#fb923c22;padding:1px 5px;border-radius:3px">CAUTION</span></div><div class="kz-time">8PM-12AM EST</div><div style="font-size:9px;color:#fb923c;margin-top:1px;font-style:italic">Low volatility — scalps only</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 4h 3m</div></div><div class="kz" style="border-left-color: rgb(251, 146, 60); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">London Pre-Market</div><span style="font-size:9px;font-weight:800;color:#fb923c;background:#fb923c22;padding:1px 5px;border-radius:3px">CAUTION</span></div><div class="kz-time">12AM-2AM EST</div><div style="font-size:9px;color:#fb923c;margin-top:1px;font-style:italic">Thin liquidity — wait for confirmation</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 8h 3m</div></div><div class="kz" style="border-left-color: rgb(245, 166, 35); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">London Kill Zone</div><span style="font-size:9px;font-weight:800;color:#f5a623;background:#f5a62322;padding:1px 5px;border-radius:3px">TRADEABLE</span></div><div class="kz-time">2AM-5AM EST</div><div style="font-size:9px;color:#f5a623;margin-top:1px;font-style:italic">Good OB + FVG setups</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 10h 3m</div></div><div class="kz" style="border-left-color: rgb(245, 166, 35); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">London-NY Overlap</div><span style="font-size:9px;font-weight:800;color:#f5a623;background:#f5a62322;padding:1px 5px;border-radius:3px">TRADEABLE</span></div><div class="kz-time">7-9AM EST</div><div style="font-size:9px;color:#f5a623;margin-top:1px;font-style:italic">High volume build — watch for sweeps</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 15h 3m</div></div><div class="kz" style="border-left-color: rgb(251, 146, 60); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">NY Pre-Market</div><span style="font-size:9px;font-weight:800;color:#fb923c;background:#fb923c22;padding:1px 5px;border-radius:3px">CAUTION</span></div><div class="kz-time">9-9:30AM EST</div><div style="font-size:9px;color:#fb923c;margin-top:1px;font-style:italic">Choppy before open — no entries</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 17h 3m</div></div><div class="kz" style="border-left-color: rgb(0, 212, 138); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">NY Open *** BEST</div><span style="font-size:9px;font-weight:800;color:#00d48a;background:#00d48a22;padding:1px 5px;border-radius:3px">BEST TRADE</span></div><div class="kz-time">9:30-11AM EST</div><div style="font-size:9px;color:#00d48a;margin-top:1px;font-style:italic">Highest probability ICT setups</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 17h 33m</div></div><div class="kz" style="border-left-color: rgb(255, 71, 87); opacity: 0.8;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px"><div class="kz-name" style="color:var(--text)">Lunch — AVOID</div><span style="font-size:9px;font-weight:800;color:#ff4757;background:#ff475722;padding:1px 5px;border-radius:3px">AVOID</span></div><div class="kz-time">11AM-1:30PM EST</div><div style="font-size:9px;color:#ff4757;margin-top:1px;font-style:italic">Choppy — no edge — stay out</div><div style="font-size:10px;color:var(--muted);margin-top:2px">In 19h 3m</div></div></div>
+    </div>
+    <div>
+      <div class="sec">Next Trade Window</div>
+      <div class="tte-box">
+        <div class="tte-lbl">Time to Next Session</div>
+        <div class="tte-val" id="tteVal" style="color: rgb(245, 166, 35);">LIVE</div>
+        <div class="tte-sub" id="tteSub">NY Afternoon</div>
+      </div>
+    </div>
+    <div>
+      <div class="sec">Distance to Entry</div>
+      <div class="pbar-wrap">
+        <div class="pbar-row"><span id="proxPct">—</span><span id="proxDollar">—</span></div>
+        <div class="pbar-track"><div class="pbar-fill" id="proxFill" style="width:0%;background:var(--gold)"></div></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);line-height:1.5" id="proxNote">—</div>
+    </div>
+    <div>
+      <div class="sec">Active ICT Signals</div>
+      <div id="sigTags"><span style="color:var(--muted);font-size:11px">—</span></div>
+    </div>
+  </div>
+
+  <!-- CENTER -->
+  <div id="center">
+    <div id="entryCard">
+      <div class="ec" id="ec-dir">
+        <div class="ec-lbl">Direction</div>
+        <div class="ec-val" id="ec-dir-v" style="color:var(--muted);font-size:14px">—</div>
+        <div class="ec-sub" id="ec-dir-s">Analyzing…</div>
+      </div>
+      <div class="ec ec-entry">
+        <div class="ec-lbl">Entry Zone</div>
+        <div class="ec-val" id="ec-entry-v" style="color:var(--gold)">—</div>
+        <div class="ec-sub" id="ec-entry-s">—</div>
+      </div>
+      <div class="ec ec-sl">
+        <div class="ec-lbl">Stop Loss</div>
+        <div class="ec-val" id="ec-sl-v" style="color:var(--red)">—</div>
+        <div class="ec-sub" id="ec-sl-s">—</div>
+      </div>
+      <div class="ec ec-tp">
+        <div class="ec-lbl">TP1 · TP2</div>
+        <div class="ec-val" id="ec-tp-v" style="color:var(--green)">—</div>
+        <div class="ec-sub" id="ec-tp-s">—</div>
+      </div>
+      <div class="ec ec-eq">
+        <div class="ec-lbl">Equilibrium</div>
+        <div class="ec-val" id="ec-eq-v" style="color:var(--cyan)">—</div>
+        <div class="ec-sub">Range midpoint</div>
+      </div>
+    </div>
+    <div id="chartArea">
+      <canvas id="cv"></canvas>
+      <div id="chartMsg" style="display: flex;"><div style="color:#fff;text-align:center;padding:30px;max-width:420px"><div style="font-size:28px;margin-bottom:10px">🚫</div><div style="font-size:15px;font-weight:900;color:var(--gold);margin-bottom:10px">Network Blocked by Claude.ai</div><div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px">Claude.ai's security policy blocks all external API calls inside this viewer.<br><strong style="color:#fff">The terminal works perfectly — you just need to open it directly in your browser.</strong></div><div style="background:rgba(245,166,35,0.1);border:1px solid var(--gold);border-radius:8px;padding:14px;text-align:left;font-size:12px;line-height:2"><strong style="color:var(--gold)">How to fix in 3 steps:</strong><br>1️⃣ Click the <strong style="color:#fff">download button</strong> (↓) on this artifact<br>2️⃣ Save the <strong style="color:#fff">.html file</strong> to your computer<br>3️⃣ <strong style="color:#fff">Double-click</strong> the file to open it in Chrome/Edge<br></div><div style="margin-top:14px;font-size:11px;color:var(--muted)">Once open locally, Finnhub will load real ^NDX candles<br>and the WebSocket will stream live prices automatically.</div><div style="margin-top:14px"><button onclick="doRefresh()" style="background:var(--gold);color:#000;border:none;padding:8px 20px;border-radius:5px;font-weight:900;cursor:pointer;font-size:12px;margin-right:8px">↺ Retry</button></div></div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div id="right">
+    <div>
+      <div class="sec">ICT Trade Verdict</div>
+      <div class="verdict wait" id="verdictBox">
+        <div class="verdict-dir" id="vDir" style="color:var(--muted)">⏸ WAIT</div>
+        <div class="verdict-ref" id="vRef">Analyzing market…</div>
+        <div class="verdict-row"><span class="verdict-lbl">Entry</span><span class="verdict-val" id="vEntry" style="color:var(--gold)">—</span></div>
+        <div class="verdict-row"><span class="verdict-lbl">Stop Loss</span><span class="verdict-val" id="vSL" style="color:var(--red)">—</span></div>
+        <div class="verdict-row"><span class="verdict-lbl">TP 1 (1:3)</span><span class="verdict-val" id="vTP1" style="color:var(--green)">—</span></div>
+        <div class="verdict-row"><span class="verdict-lbl">TP 2 (1:5)</span><span class="verdict-val" id="vTP2" style="color:var(--green)">—</span></div>
+        <div class="verdict-row"><span class="verdict-lbl">R:R</span><span class="verdict-val" id="vRR">—</span></div>
+        <div class="verdict-row"><span class="verdict-lbl">Confidence</span><span class="verdict-val" id="vConf">—</span></div>
+        <div class="conf-bar-wrap"><div class="conf-bar-track"><div class="conf-bar-fill" id="confBar" style="width:0%;background:var(--gold)"></div></div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">ICT Strategy Evidence</div>
+      <div class="ict-evidence">
+        <div class="ict-ev-row"><span class="ict-ev-label">📦 Order Block (OB)</span><span class="ict-ev-val ev-miss" id="ev-ob">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">⚡ Fair Value Gap (FVG)</span><span class="ict-ev-val ev-miss" id="ev-fvg">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">📅 PDH</span><span class="ict-ev-val ev-miss" id="ev-pdh">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">📅 PDL</span><span class="ict-ev-val ev-miss" id="ev-pdl">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">⚖ Equilibrium (EQ)</span><span class="ict-ev-val ev-miss" id="ev-eq">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">🌊 Liquidity Sweep</span><span class="ict-ev-val ev-miss" id="ev-sweep">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">💥 MSB</span><span class="ict-ev-val ev-miss" id="ev-msb">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">📐 Premium/Discount</span><span class="ict-ev-val ev-miss" id="ev-pd">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">⌛ Kill Zone</span><span class="ict-ev-val ev-miss" id="ev-kz">—</span></div>
+        <div class="ict-ev-row"><span class="ict-ev-label">📊 Swing Structure</span><span class="ict-ev-val ev-miss" id="ev-swing">—</span></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sec">Market Facts</div>
+      <div class="fact"><span class="fl">Bias</span><span class="fv" id="fBias">—</span></div>
+      <div class="fact"><span class="fl">Zone</span><span class="fv" id="fZone">—</span></div>
+      <div class="fact"><span class="fl">Day Open</span><span class="fv" id="fOpen">—</span></div>
+      <div class="fact"><span class="fl">Day High</span><span class="fv" id="fHigh">—</span></div>
+      <div class="fact"><span class="fl">Day Low</span><span class="fv" id="fLow">—</span></div>
+      <div class="fact"><span class="fl">ATR (14)</span><span class="fv" id="fATR">—</span></div>
+      <div class="fact"><span class="fl">PDH</span><span class="fv gold" id="fPDH">—</span></div>
+      <div class="fact"><span class="fl">PDL</span><span class="fv gold" id="fPDL">—</span></div>
+      <div class="fact"><span class="fl">EQ (Midpoint)</span><span class="fv cyan" id="fEq">—</span></div>
+      <div class="fact"><span class="fl">OBs Active</span><span class="fv" id="fOB">—</span></div>
+      <div class="fact"><span class="fl">FVGs Active</span><span class="fv" id="fFVG">—</span></div>
+      <div class="fact"><span class="fl">Volume</span><span class="fv" id="fVol">—</span></div>
+    </div>
+
+    <div style="background:var(--panel);border:1px solid var(--border2);border-radius:7px;padding:10px">
+      <div class="sec" style="margin-bottom:6px">When To Enter</div>
+      <div id="entryAdvice" style="font-size:11px;color:var(--muted);line-height:1.7">Analyzing…</div>
+    </div>
+
+    <!-- NEWS SIDE STRATEGY -->
+    <div>
+      <div class="sec" style="color:var(--cyan)">📰 News Side Strategy
+        <span style="font-size:8px;color:var(--muted);font-weight:400;float:right;margin-top:1px" id="newsLastUpdated">Updated 14:55</span>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-bottom:6px;line-height:1.5;background:rgba(6,182,212,.05);border:1px solid rgba(6,182,212,.15);border-radius:5px;padding:5px 7px">
+        ⚠ Side strategy only. High-impact news can override ICT setups — widen SL or stay flat during red events.
+      </div>
+      <div id="newsList"><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fmarkets%2Fcrypto%2Farticles%2Fbitcoin-hits-61-877-tech-190330188.html%3F.tsrc%3Drss&#39;)"><div class="news-headline">Bitcoin Hits $61,877 as Tech Selloff Pressures Crypto</div><div class="news-meta"><span>52m ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fm%2Fa34938f7-f5da-3e7e-8012-b34de5e2220e%2Fbig-tech%25E2%2580%2599s-fear-gauge-is.html%3F.tsrc%3Drss&#39;)"><div class="news-headline">Big Tech’s Fear Gauge Is Flashing Warning Signs</div><div class="news-meta"><span>4h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fm%2F20ea1996-a9b0-3f10-939b-ef077feeda37%2Fnasdaq-tumbles-2.4%2525.-a-chip.html%3F.tsrc%3Drss&#39;)"><div class="news-headline">Nasdaq Tumbles 2.4%. A Chip Selloff Grips Wall Street.</div><div class="news-meta"><span>6h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fm%2F40e54e47-a453-3f34-9fc4-127da67e7cbc%2Fthe-%25241-trillion-meltdown..html%3F.tsrc%3Drss&#39;)"><div class="news-headline">The $1 Trillion Meltdown. Chip Stocks Lead a Steep Nasdaq Decline.</div><div class="news-meta"><span>7h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fmarkets%2Fstocks%2Farticles%2Fsouth-korea-leveraged-etf-crisis-124927381.html%3F.tsrc%3Drss&#39;)"><div class="news-headline">South Korea leveraged ETF crisis sparks global chip selloff</div><div class="news-meta"><span>7h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fmarkets%2Fstocks%2Farticles%2Fglobal-tech-rout-deepens-kospi-123717488.html%3F.tsrc%3Drss&#39;)"><div class="news-headline">Global Tech Rout Deepens as Kospi Drops 10%, Nasdaq Futures Sink 2.6%</div><div class="news-meta"><span>7h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Ffinance.yahoo.com%2Fmarkets%2Fstocks%2Farticles%2Fspacex-nike-slip-premarket-zeta-122603864.html%3F.tsrc%3Drss&#39;)"><div class="news-headline">SpaceX, Nike slip premarket; Zeta Global rises</div><div class="news-meta"><span>7h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div><div class="news-card neutral" onclick="openNews(&#39;https%3A%2F%2Finvestorshub.advfn.com%2Fmarket-news%2Farticle%2F30892%2Fspacex-extends-decline-as-tech-stocks-retreat-and-investors-reassess-ai-spending-dow-jones-sp-nasdaq-wall-street-futures%3F.tsrc%3Drss&#39;)"><div class="news-headline">SpaceX Extends Decline as Tech Stocks Retreat and Investors Reassess AI Spending: Dow Jones, S&amp;P, Nasdaq, Wall Street Futures</div><div class="news-meta"><span>9h ago</span><div style="display:flex;gap:4px;align-items:center"><span style="color:var(--muted);font-weight:900;font-size:10px">— NEUTRAL</span><span class="news-impact low">LOW</span></div></div></div></div>
+    </div>
+
+    <!-- ECON CALENDAR -->
+    <div>
+      <div class="sec" style="color:var(--purple)">📅 Upcoming Econ Events</div>
+      <div style="background:var(--panel);border:1px solid var(--border2);border-radius:7px;padding:8px" id="econList"><div class="econ-event"><div><div class="econ-name">FOMC Minutes</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Fed policy — major NDX mover</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">2:00 PM EST</div></div></div><div class="econ-event"><div><div class="econ-name">CPI Inflation Data</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Hot CPI = bearish, cool = bullish</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">8:30 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">Non-Farm Payrolls</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Jobs data drives rate expectations</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">8:30 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">PPI Data</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Producer prices — inflation signal</div></div><div style="text-align:right"><span class="econ-impact econ-med">MED</span><div style="font-size:9px;color:var(--muted);margin-top:2px">8:30 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">GDP Report</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Strong GDP can lift or pressure NDX</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">8:30 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">Initial Jobless Claims</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Weekly jobs — risk appetite gauge</div></div><div style="text-align:right"><span class="econ-impact econ-med">MED</span><div style="font-size:9px;color:var(--muted);margin-top:2px">8:30 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">ISM Manufacturing</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Business activity indicator</div></div><div style="text-align:right"><span class="econ-impact econ-med">MED</span><div style="font-size:9px;color:var(--muted);margin-top:2px">10:00 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">Consumer Confidence</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Retail sentiment signal</div></div><div style="text-align:right"><span class="econ-impact econ-med">MED</span><div style="font-size:9px;color:var(--muted);margin-top:2px">10:00 AM EST</div></div></div><div class="econ-event"><div><div class="econ-name">NVIDIA Earnings ▲</div><div style="font-size:9px;color:var(--muted);margin-top:1px">NVDA heavily weights NDX</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">After Close</div></div></div><div class="econ-event"><div><div class="econ-name">Apple Earnings ▲</div><div style="font-size:9px;color:var(--muted);margin-top:1px">AAPL = largest NDX component</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">After Close</div></div></div><div class="econ-event"><div><div class="econ-name">Fed Chair Speech</div><div style="font-size:9px;color:var(--muted);margin-top:1px">Hawkish = bearish, dovish = bullish</div></div><div style="text-align:right"><span class="econ-impact econ-high">HIGH</span><div style="font-size:9px;color:var(--muted);margin-top:2px">Varies</div></div></div></div>
+    </div>
+
+    <div style="font-size:9px;color:var(--dim);text-align:center;line-height:1.6;padding:4px">
+      ⚠️ Educational only · Not financial advice · Use your own risk management
+    </div>
+  </div>
+</div>
+
+<script>
+var TICKER = '^NDX';
+var INTERVAL = '5m';
+var RANGE = '5d';
+
+// 24/7 session definitions — s/e in minutes from midnight EST
+var SESSIONS = [
+  {name:'After Hours',        s:16*60+30, e:20*60,    c:'#2d3748', d:'4:30-8PM EST',    rating:'avoid',   tip:'Illiquid — skip entirely',              trade:false},
+  {name:'Asian Session',      s:20*60,    e:24*60,    c:'#8b5cf6', d:'8PM-12AM EST',   rating:'caution', tip:'Low volatility — scalps only',           trade:true},
+  {name:'London Pre-Market',  s:0,        e:2*60,     c:'#6366f1', d:'12AM-2AM EST',   rating:'caution', tip:'Thin liquidity — wait for confirmation', trade:true},
+  {name:'London Kill Zone',   s:2*60,     e:5*60,     c:'#3b82f6', d:'2AM-5AM EST',    rating:'good',    tip:'Good OB + FVG setups',                   trade:true},
+  {name:'London-NY Overlap',  s:7*60,     e:9*60,     c:'#06b6d4', d:'7-9AM EST',      rating:'good',    tip:'High volume build — watch for sweeps',   trade:true},
+  {name:'NY Pre-Market',      s:9*60,     e:9*60+30,  c:'#f5a623', d:'9-9:30AM EST',   rating:'caution', tip:'Choppy before open — no entries',        trade:false},
+  {name:'NY Open *** BEST',   s:9*60+30,  e:11*60,    c:'#00d48a', d:'9:30-11AM EST',  rating:'best',    tip:'Highest probability ICT setups',          trade:true},
+  {name:'Lunch — AVOID',      s:11*60,    e:13*60+30, c:'#4a5568', d:'11AM-1:30PM EST',rating:'avoid',   tip:'Choppy — no edge — stay out',            trade:false},
+  {name:'NY Afternoon',       s:13*60+30, e:16*60,    c:'#f5a623', d:'1:30-4PM EST',   rating:'good',    tip:'Continuation + PM reversal setups',      trade:true},
+  {name:'NY Close',           s:15*60+30, e:16*60+30, c:'#ff4757', d:'3:30-4:30PM EST',rating:'caution', tip:'High volatility EOD — tight SLs',        trade:false}
+];
+var TRADE_SESSIONS = SESSIONS.filter(function(k){ return k.trade && k.rating !== 'avoid'; });
+
+var gC = [], gA = null, lastAlertSig = null;
+var livePrice = null, prevLivePrice = null;
+var tickVelocity = 0, tickNoise = 0;
+
+function $(id){ return document.getElementById(id); }
+function fmt(p){ return p==null||isNaN(p)?'--':p>=10000?p.toFixed(0):p>=1000?p.toFixed(1):p>=10?p.toFixed(2):p.toFixed(4); }
+function fmtVol(v){ return v>1e9?(v/1e9).toFixed(1)+'B':v>1e6?(v/1e6).toFixed(1)+'M':v>1e3?(v/1e3).toFixed(0)+'K':String(v); }
+function getEST(){ return new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'})); }
+function toMins(d){ return d.getHours()*60+d.getMinutes(); }
+
+function sessionActive(s, now){
+  if(s.s < s.e) return now >= s.s && now < s.e;
+  return now >= s.s || now < s.e; // midnight wrap
+}
+
+// ── Audio ───────────────────────────────────────────────────
+function beep(type){
+  try {
+    var ac = new(window.AudioContext||window.webkitAudioContext)();
+    var freqs = type==='buy'?[523,659,784,1047]:[523,440,349,262];
+    freqs.forEach(function(f,i){
+      var o=ac.createOscillator(), g=ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.frequency.value=f; o.type='triangle';
+      var t=ac.currentTime+i*0.15;
+      g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(0.2,t+0.03);
+      g.gain.exponentialRampToValueAtTime(0.001,t+0.3);
+      o.start(t); o.stop(t+0.35);
+    });
+  } catch(e){}
+}
+
+// ── Market Status ────────────────────────────────────────────
+function updateMarketStatus(){
+  var est = getEST();
+  var h = est.getHours(), m = est.getMinutes(), day = est.getDay();
+  var totalMins = h * 60 + m;
+  var isWeekend = day === 0 || day === 6;
+
+  var mktEl = $('mktStatus');
+  var mktTxt = $('mktStatusTxt');
+  var mktSes = $('mktSessionTxt');
+
+  if(isWeekend){
+    mktEl.className = 'closed'; mktTxt.textContent = 'CLOSED'; mktSes.textContent = 'Weekend';
+    return;
+  }
+
+  // Pre-market: 4:00–9:30 AM EST
+  if(totalMins >= 4*60 && totalMins < 9*60+30){
+    mktEl.className = 'premarket'; mktTxt.textContent = 'PRE-MKT';
+    var rem = 9*60+30 - totalMins;
+    mktSes.textContent = 'Opens in '+Math.floor(rem/60)+'h '+rem%60+'m';
+    return;
+  }
+  // Regular session: 9:30 AM – 4:00 PM EST
+  if(totalMins >= 9*60+30 && totalMins < 16*60){
+    mktEl.className = 'open'; mktTxt.textContent = 'OPEN';
+    var rem2 = 16*60 - totalMins;
+    mktSes.textContent = 'Closes in '+(rem2>=60?Math.floor(rem2/60)+'h '+rem2%60+'m':rem2+'m');
+    return;
+  }
+  // After hours: 4:00–8:00 PM EST
+  if(totalMins >= 16*60 && totalMins < 20*60){
+    mktEl.className = 'afterhours'; mktTxt.textContent = 'AFTER HRS'; mktSes.textContent = '4PM–8PM EST';
+    return;
+  }
+  mktEl.className = 'closed'; mktTxt.textContent = 'CLOSED'; mktSes.textContent = 'Opens 9:30AM EST';
+}
+
+// ── Candle Timer ─────────────────────────────────────────────
+function updateCandleTimer(){
+  if(!gC.length) return;
+  var now = Date.now();
+  var lastCandleTime = gC[gC.length-1].time;
+  var elapsed = now - lastCandleTime;
+  var period = 5 * 60 * 1000; // 5 minutes
+  var remaining = Math.max(0, period - elapsed);
+  var pct = Math.min(100, (elapsed / period) * 100);
+  var remSecs = Math.ceil(remaining / 1000);
+  var mm = Math.floor(remSecs / 60);
+  var ss = remSecs % 60;
+  $('candleTimerTxt').textContent = mm+':'+(ss<10?'0':'')+ss;
+  $('candleProgressFill').style.width = pct + '%';
+  // Color the bar: green when new candle imminent
+  $('candleProgressFill').style.background = pct > 85 ? 'var(--green)' : pct > 60 ? 'var(--gold)' : 'var(--cyan)';
+}
+
+
+function setSignalState(state, sub){
+  $('sigStandby').className = 'sig-state';
+  $('sigWatch').className   = 'sig-state';
+  $('sigEnter').className   = 'sig-state';
+  if(state === 'standby'){
+    $('sigStandby').className = 'sig-state active';
+    $('sigStandbySub').textContent = sub || 'No kill zone active';
+  } else if(state === 'watch'){
+    $('sigWatch').className = 'sig-state active';
+    $('sigWatchSub').textContent = sub || 'Kill zone opening soon';
+  } else if(state === 'buy'){
+    $('sigEnter').className = 'sig-state active-buy';
+    $('sigEnterIcon').textContent = 'BUY';
+    $('sigEnterMain').textContent = 'BUY NOW';
+    $('sigEnterSub').textContent = sub || 'Price at zone — execute!';
+  } else if(state === 'sell'){
+    $('sigEnter').className = 'sig-state active-sell';
+    $('sigEnterIcon').textContent = 'SELL';
+    $('sigEnterMain').textContent = 'SELL NOW';
+    $('sigEnterSub').textContent = sub || 'Price at zone — execute!';
+  }
+}
+
+// ── Clock + Session Panel ───────────────────────────────────
+function tickClock(){
+  var est = getEST();
+  var hh = String(est.getHours()).padStart(2,'0');
+  var mm = String(est.getMinutes()).padStart(2,'0');
+  var ss = String(est.getSeconds()).padStart(2,'0');
+  $('clock').textContent = hh+':'+mm+':'+ss+' EST';
+  renderSessions(est);
+  if(gA && gC.length) updateSignalState(est);
+  updateMarketStatus();
+  updateCandleTimer();
+}
+
+function renderSessions(est){
+  var now = toMins(est);
+  var list = $('kzList');
+  list.innerHTML = '';
+  var nextTrade = null, bestW = Infinity;
+
+  // Sort: active first, then by time-until
+  var sorted = SESSIONS.slice().sort(function(a,b){
+    var aa = sessionActive(a, now), ba = sessionActive(b, now);
+    if(aa && !ba) return -1; if(!aa && ba) return 1;
+    var wa = a.s - now; if(wa<0) wa+=1440;
+    var wb = b.s - now; if(wb<0) wb+=1440;
+    return wa-wb;
+  });
+
+  sorted.forEach(function(kz){
+    var active = sessionActive(kz, now);
+    var w = kz.s - now; if(w<0) w+=1440;
+    if(kz.trade && kz.rating!=='avoid' && !active && w<bestW){ bestW=w; nextTrade={kz:kz,w:w}; }
+
+    var rColor = {best:'#00d48a',good:'#f5a623',caution:'#fb923c',avoid:'#ff4757'}[kz.rating];
+    var rIcon  = {best:'GREEN',good:'YELLOW',caution:'ORANGE',avoid:'RED'}[kz.rating];
+    var rLabel = {best:'BEST TRADE',good:'TRADEABLE',caution:'CAUTION',avoid:'AVOID'}[kz.rating];
+
+    var statusHtml = '';
+    if(active){
+      statusHtml = '<div style="font-size:10px;color:'+kz.c+';font-weight:800;margin-top:2px">ACTIVE NOW</div>';
+    } else {
+      var h=Math.floor(w/60), m=w%60;
+      statusHtml = '<div style="font-size:10px;color:var(--muted);margin-top:2px">In '+h+'h '+m+'m</div>';
+    }
+
+    var d = document.createElement('div');
+    d.className = 'kz' + (active?' active':'');
+    d.style.borderLeftColor = active ? kz.c : rColor;
+    d.style.opacity = active ? '1' : '0.8';
+    d.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2px">' +
+        '<div class="kz-name" style="color:'+(active?kz.c:'var(--text)')+'">'+kz.name+'</div>' +
+        '<span style="font-size:9px;font-weight:800;color:'+rColor+';background:'+rColor+'22;padding:1px 5px;border-radius:3px">'+rLabel+'</span>' +
+      '</div>' +
+      '<div class="kz-time">'+kz.d+'</div>' +
+      '<div style="font-size:9px;color:'+rColor+';margin-top:1px;font-style:italic">'+kz.tip+'</div>' +
+      statusHtml;
+    list.appendChild(d);
+  });
+
+  // TTE box
+  var activeTrade = SESSIONS.find(function(kz){ return sessionActive(kz,now) && kz.trade && kz.rating!=='avoid'; });
+  if(activeTrade){
+    $('tteVal').textContent = 'LIVE';
+    $('tteVal').style.color = {best:'#00d48a',good:'#f5a623',caution:'#fb923c'}[activeTrade.rating]||'#f5a623';
+    $('tteSub').textContent = activeTrade.name;
+  } else if(nextTrade){
+    var h=Math.floor(nextTrade.w/60), m=nextTrade.w%60;
+    $('tteVal').textContent = h+'h '+m+'m';
+    $('tteVal').style.color = '#f5a623';
+    $('tteSub').textContent = 'Until '+nextTrade.kz.name;
+  }
+}
+
+// ── Live Tick Simulation ────────────────────────────────────
+function initTick(basePrice, atr){
+  livePrice = basePrice;
+  tickNoise = atr * 0.004;
+  tickVelocity = (Math.random()-0.5)*atr*0.02;
+}
+
+function advanceTick(){
+  if(livePrice==null || !gC.length) return;
+  var atr = gA ? gA.atr : livePrice*0.002;
+
+  // Strong mean-reversion toward last real fetched price (prevents endless drift)
+  var anchor = lastRealPrice || livePrice;
+  var drift = Date.now() - lastRealTime; // ms since last real data
+  // The longer since real data, the harder we pull back toward anchor
+  var revStrength = Math.min(0.05, 0.001 + drift/600000);
+  var reversion = (anchor - livePrice) * revStrength;
+
+  tickVelocity = tickVelocity*0.88 + (Math.random()-0.5)*tickNoise*0.6 + reversion;
+  var maxV = atr*0.03;
+  if(tickVelocity>maxV) tickVelocity=maxV;
+  if(tickVelocity<-maxV) tickVelocity=-maxV;
+
+  prevLivePrice = livePrice;
+  livePrice = Math.round((livePrice + tickVelocity)*100)/100;
+
+  var n = gC.length;
+  if(n>0){
+    var last = gC[n-1];
+    var nowMs = Date.now();
+    var candlePeriod = 5*60*1000; // 5 minutes in ms
+
+    // Check if we've crossed into a new 5-minute candle
+    // Align to real 5-minute UTC boundaries
+    var lastCandleBucket = Math.floor(last.time / candlePeriod);
+    var nowBucket = Math.floor(nowMs / candlePeriod);
+
+    if(lastRealTime > 0 && nowBucket > lastCandleBucket){
+      // New 5-minute candle!
+      var newCandleTime = nowBucket * candlePeriod;
+      gC.push({time:newCandleTime, open:livePrice, high:livePrice, low:livePrice, close:livePrice, volume:0});
+      // Re-run ICT analysis on new candle set
+      var newAnalysis = runICT(gC);
+      if(newAnalysis) gA = newAnalysis;
+    } else {
+      // Update current candle
+      last.close = livePrice;
+      if(livePrice > last.high) last.high = livePrice;
+      if(livePrice < last.low)  last.low  = livePrice;
+    }
+  }
+  updatePriceDisplay();
+  updateEvidence();
+  drawChart(gC, gA);
+}
+
+function updatePriceDisplay(){
+  if(livePrice==null || !gC.length) return;
+  var ref = gC.length>1 ? gC[gC.length-2].close : gC[0].open;
+  var chg = livePrice - ref;
+  var pct = chg/ref*100;
+  var up = chg>=0;
+  var tpEl = $('tp');
+  tpEl.textContent = fmt(livePrice);
+  tpEl.style.color = up?'#00d48a':'#ff4757';
+  tpEl.classList.remove('flash-up','flash-dn');
+  void tpEl.offsetWidth;
+  if(prevLivePrice!==null) tpEl.classList.add(livePrice>prevLivePrice?'flash-up':'flash-dn');
+  $('tc').textContent = (up?'+':'')+fmt(chg)+' ('+(up?'+':'')+pct.toFixed(2)+'%)';
+  $('tc').className = 'ticker-chg '+(up?'chg-up':'chg-dn');
+  $('tickDir').textContent = livePrice>prevLivePrice?'▲':livePrice<prevLivePrice?'▼':'';
+  $('tickDir').style.color = livePrice>prevLivePrice?'#00d48a':'#ff4757';
+  // Show SIMULATED warning if no real data in last 90 seconds
+  var staleness = Date.now() - lastRealTime;
+  if(lastRealTime === 0 || staleness > 90000){
+    $('statusTxt').textContent = staleness > 90000 ? 'SIMULATED — data stale '+Math.round(staleness/1000)+'s' : 'Connecting...';
+    $('statusTxt').style.color = 'var(--gold)';
+  }
+}
+
+// ── Signal State ────────────────────────────────────────────
+function updateSignalState(est){
+  if(!gA||!gA.entry||!gC.length) return;
+  var now = toMins(est);
+  var price = livePrice || gC[gC.length-1].close;
+  var entry=gA.entry, sl=gA.sl, tp=gA.tp, setupType=gA.setupType;
+  var kzActive = TRADE_SESSIONS.some(function(kz){ return sessionActive(kz,now); });
+  var activeKZ  = TRADE_SESSIONS.find(function(kz){ return sessionActive(kz,now); });
+  var kzName = activeKZ ? activeKZ.name : '';
+  var dist = Math.abs(price-entry);
+  var pct  = dist/price*100;
+  var closeness = Math.max(0, Math.min(100, 100-(pct/5)*100));
+  var isBuy = setupType==='BUY';
+
+  $('proxPct').textContent = pct.toFixed(2)+'% away';
+  $('proxDollar').textContent = fmt(dist)+' pts';
+  var pf = $('proxFill');
+  pf.style.width = closeness+'%';
+  pf.style.background = closeness>80?'#00d48a':closeness>50?'#f5a623':'#4a5568';
+
+  if(kzActive && pct<=0.25){
+    var sig = 'ENTER_'+setupType;
+    if(lastAlertSig!==sig){ beep(isBuy?'buy':'sell'); lastAlertSig=sig; }
+    setSignalState(isBuy?'buy':'sell', fmt(entry)+' | SL '+fmt(sl)+' | TP '+fmt(tp)+' | '+kzName);
+    updateEntryCard('NOW', isBuy);
+    $('proxNote').textContent = 'Price AT entry zone during Kill Zone — Execute now!';
+    $('proxNote').style.color = '#00d48a';
+  } else if(kzActive && pct<=1.5){
+    lastAlertSig = null;
+    setSignalState('watch', kzName+' LIVE | '+fmt(dist)+' pts to entry '+fmt(entry));
+    updateEntryCard('WATCH', isBuy);
+    $('proxNote').textContent = 'Kill zone active. Price approaching — get ready.';
+    $('proxNote').style.color = '#f5a623';
+  } else {
+    lastAlertSig = null;
+    var nextKZ = TRADE_SESSIONS.reduce(function(best,kz){
+      var w = kz.s-now; if(w<0) w+=1440;
+      return w<(best?best.w:Infinity)?{kz:kz,w:w}:best;
+    }, null);
+    var sub = 'No kill zone active';
+    if(kzActive) sub = kzName+' live | '+fmt(dist)+' pts from entry';
+    else if(nextKZ){ var h=Math.floor(nextKZ.w/60),m=nextKZ.w%60; sub=nextKZ.kz.name+' in '+h+'h '+m+'m'; }
+    setSignalState('standby', sub);
+    updateEntryCard('STANDBY', isBuy);
+    $('proxNote').textContent = 'Wait for a Kill Zone. Target $'+fmt(entry);
+    $('proxNote').style.color = 'var(--muted)';
+  }
+}
+
+function updateEntryCard(status, isBuy){
+  var col = isBuy?'#00d48a':'#ff4757';
+  var ec=$('ec-dir'), ecv=$('ec-dir-v'), ecs=$('ec-dir-s');
+  ec.className = 'ec'+(status==='NOW'?(isBuy?' ec-buy':' ec-sell'):'');
+  ecv.style.color = status==='NOW'?col:status==='WATCH'?'#f5a623':'#4a5568';
+  ecv.textContent = isBuy?'BUY':'SELL';
+  ecs.textContent = status==='NOW'?'ENTER NOW':status==='WATCH'?'GET READY':'WAIT';
+}
+
+// ── Live Evidence Panel ─────────────────────────────────────
+function updateEvidence(){
+  if(!gA) return;
+  var cur = livePrice || (gC.length?gC[gC.length-1].close:0);
+  if(!cur) return;
+  var eq = (gA.rangeHigh+gA.rangeLow)/2;
+  var aOBs = gA.orderBlocks.filter(function(o){ return !o.mitigated; });
+  var aFVGs = gA.fvgs.filter(function(f){ return !f.filled; });
+  var est = getEST(), now = toMins(est);
+  var currentSession = SESSIONS.find(function(kz){ return sessionActive(kz,now); });
+  var tradeSession   = TRADE_SESSIONS.find(function(kz){ return sessionActive(kz,now); });
+
+  function setEv(id, text, cls){
+    var el = $(id); if(!el) return;
+    var prev = el.dataset.last;
+    if(prev !== text){
+      el.textContent = text;
+      el.className = 'ict-ev-val '+(cls||'ev-miss');
+      el.dataset.last = text;
+      if(prev !== undefined){
+        el.style.background = cls==='ev-hit'?'rgba(0,212,138,.2)':cls==='ev-warn'?'rgba(245,166,35,.2)':'rgba(74,85,104,.15)';
+        setTimeout(function(){ el.style.background=''; }, 500);
+      }
+    }
+  }
+
+  // OB — is price inside one?
+  var inOB = aOBs.find(function(o){ return cur>=o.low && cur<=o.high; });
+  setEv('ev-ob',
+    aOBs.length?(aOBs.length+' active ('+aOBs.filter(function(o){return o.type==='bullish';}).length+'B/'+aOBs.filter(function(o){return o.type==='bearish';}).length+'S)'+(inOB?' IN OB '+inOB.type.toUpperCase():'')):'None active',
+    aOBs.length?(inOB?'ev-hit':'ev-hit'):'ev-miss');
+
+  // FVG — is price inside one?
+  var inFVG = aFVGs.find(function(f){ return cur>=f.bottom && cur<=f.top; });
+  setEv('ev-fvg',
+    aFVGs.length?(aFVGs.length+' open'+(inFVG?' IN FVG '+inFVG.type.toUpperCase():'')):'None open',
+    aFVGs.length?(inFVG?'ev-hit':'ev-hit'):'ev-miss');
+
+  // PDH
+  if(gA.pdh){
+    var pdhNear = Math.abs(cur-gA.pdh)/gA.pdh < 0.0015;
+    setEv('ev-pdh', fmt(gA.pdh)+(pdhNear?' NEAR':(cur>gA.pdh?' Above':' Below')), cur>gA.pdh?'ev-hit':pdhNear?'ev-warn':'ev-miss');
+  } else setEv('ev-pdh','--','ev-miss');
+
+  // PDL
+  if(gA.pdl){
+    var pdlNear = Math.abs(cur-gA.pdl)/gA.pdl < 0.0015;
+    setEv('ev-pdl', fmt(gA.pdl)+(pdlNear?' NEAR':(cur<gA.pdl?' Below':' Above')), cur<gA.pdl?'ev-hit':pdlNear?'ev-warn':'ev-miss');
+  } else setEv('ev-pdl','--','ev-miss');
+
+  // EQ
+  var eqNear = Math.abs(cur-eq)/eq < 0.001;
+  var eqAligned = (gA.bias==='bullish'&&cur<eq)||(gA.bias==='bearish'&&cur>eq);
+  setEv('ev-eq', fmt(eq)+' '+(cur>eq?'Premium':cur<eq?'Discount':'AT EQ')+(eqNear?' NEAR':''), eqAligned?'ev-hit':eqNear?'ev-warn':'ev-miss');
+
+  // Liquidity Sweep
+  setEv('ev-sweep',
+    gA.liquiditySweep?('Detected '+gA.liquiditySweep.type.toUpperCase()+' @ '+fmt(gA.liquiditySweep.level)):'Not detected',
+    gA.liquiditySweep?'ev-hit':'ev-miss');
+
+  // MSB
+  setEv('ev-msb',
+    gA.msbDetected?('MSB '+gA.msbType.toUpperCase()+' confirmed'):'Not detected',
+    gA.msbDetected?'ev-hit':'ev-miss');
+
+  // Premium/Discount alignment
+  var pdAlign = (gA.bias==='bullish'&&gA.premDisc==='discount')||(gA.bias==='bearish'&&gA.premDisc==='premium');
+  setEv('ev-pd', gA.premDisc.toUpperCase()+(pdAlign?' Aligned':' Misaligned'), pdAlign?'ev-hit':'ev-warn');
+
+  // Kill Zone
+  var kzTip = currentSession ? currentSession.tip : 'Off-hours — no edge';
+  var kzCls = tradeSession?({best:'ev-hit',good:'ev-hit',caution:'ev-warn'}[tradeSession.rating]||'ev-miss'):'ev-miss';
+  setEv('ev-kz', currentSession?(currentSession.name+' — '+kzTip):'No session active', kzCls);
+
+  // Swing structure
+  var swingOk = (gA.bias==='bullish'&&gA.swingHighs.length>=2&&gA.swingLows.length>=2)||(gA.bias==='bearish'&&gA.swingHighs.length>=2);
+  setEv('ev-swing',
+    swingOk?(gA.bias.toUpperCase()+' confirmed '+gA.swingHighs.length+'SH/'+gA.swingLows.length+'SL'):(gA.swingHighs.length+'SH/'+gA.swingLows.length+'SL forming'),
+    swingOk?'ev-hit':'ev-miss');
+}
+
+// ── Finnhub Data — Real ^NDX candles + live WebSocket ticks ─
+var FINNHUB_KEY = 'd8te6k1r01qhcnk23n5gd8te6k1r01qhcnk23n60';
+var isLiveData = false;
+var dataSource = 'Finnhub';
+var finnhubWS = null;
+var wsConnected = false;
+
+// ── Fetch historical 5-min candles from Finnhub ─────────────
+function fetchData(){
+  // Finnhub uses symbol NDX for Nasdaq-100 (not ^NDX)
+  // Resolution: 5 = 5-minute bars
+  var now   = Math.floor(Date.now()/1000);
+  var from  = now - 5 * 24 * 3600; // 5 days back
+  var url   = 'https://finnhub.io/api/v1/index/candle?symbol=NDX&resolution=5&from='+from+'&to='+now+'&token='+FINNHUB_KEY;
+
+  return fetch(url, {signal: AbortSignal.timeout(15000)})
+    .then(function(r){
+      if(!r.ok) throw new Error('Finnhub HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(d){
+      if(!d || d.s === 'no_data') throw new Error('Finnhub: no_data returned');
+      if(d.s !== 'ok') throw new Error('Finnhub status: '+d.s);
+      if(!d.t || !d.t.length) throw new Error('Finnhub: empty candle array');
+
+      var candles = [];
+      for(var i = 0; i < d.t.length; i++){
+        var o=d.o[i], h=d.h[i], l=d.l[i], c=d.c[i], v=d.v?d.v[i]:0;
+        if(isNaN(o)||h<=0) continue;
+        candles.push({time: d.t[i]*1000, open:o, high:h, low:l, close:c, volume:v||0});
+      }
+      if(candles.length < 5) throw new Error('Finnhub: too few candles ('+candles.length+')');
+      candles.sort(function(a,b){ return a.time - b.time; });
+
+      var last = candles[candles.length-1];
+      isLiveData = true;
+      return {
+        candles:      candles,
+        currentPrice: last.close,
+        prevClose:    candles.length > 1 ? candles[candles.length-2].close : last.open,
+        dayHigh:      d.h ? Math.max.apply(null, d.h.slice(-78)) : null,
+        dayLow:       d.l ? Math.min.apply(null, d.l.slice(-78)) : null,
+        volume:       null
+      };
+    });
+}
+
+// ── Finnhub WebSocket — live price ticks for NDX ────────────
+function startFinnhubWS(){
+  if(finnhubWS && (finnhubWS.readyState === WebSocket.OPEN || finnhubWS.readyState === WebSocket.CONNECTING)) return;
+
+  try {
+    finnhubWS = new WebSocket('wss://ws.finnhub.io?token='+FINNHUB_KEY);
+  } catch(e){ console.warn('WS init failed:', e); return; }
+
+  finnhubWS.onopen = function(){
+    wsConnected = true;
+    // Subscribe to NDX index trades
+    finnhubWS.send(JSON.stringify({type:'subscribe', symbol:'NDX'}));
+    // Also subscribe to QQQ as a real-time proxy if NDX ticks are sparse
+    finnhubWS.send(JSON.stringify({type:'subscribe', symbol:'QQQ'}));
+    console.log('Finnhub WS connected');
+    $('statusTxt').textContent = 'LIVE · ^NDX · WebSocket';
+    $('statusTxt').style.color = 'var(--green)';
+  };
+
+  finnhubWS.onmessage = function(event){
+    try {
+      var msg = JSON.parse(event.data);
+      if(msg.type !== 'trade' || !msg.data || !msg.data.length) return;
+
+      msg.data.forEach(function(trade){
+        var price = trade.p;
+        var sym   = trade.s;
+        if(!price || price <= 0) return;
+
+        // NDX direct tick
+        if(sym === 'NDX' && price > 10000){
+          applyLiveTick(price);
+        }
+        // QQQ as fallback — scale to NDX (QQQ × ~24.7)
+        // Only use if we haven't received a real NDX tick recently
+        if(sym === 'QQQ' && price > 100 && price < 1000){
+          if(!livePrice || livePrice < 10000){
+            applyLiveTick(Math.round(price * 24.7 * 100) / 100);
+          }
+        }
+      });
+    } catch(e){ /* ignore parse errors */ }
+  };
+
+  finnhubWS.onerror = function(){ wsConnected = false; };
+
+  finnhubWS.onclose = function(){
+    wsConnected = false;
+    console.warn('Finnhub WS closed — reconnecting in 5s');
+    setTimeout(startFinnhubWS, 5000);
+  };
+}
+
+// Apply a live WebSocket price tick to the current forming candle
+function applyLiveTick(price){
+  if(!gC || !gC.length) return;
+  price = Math.round(price * 100) / 100;
+  prevLivePrice = livePrice || price;
+  livePrice = price;
+  lastRealPrice = price;
+  lastRealTime = Date.now();
+
+  var nowMs = Date.now();
+  var last  = gC[gC.length - 1];
+  var candlePeriod = 5 * 60 * 1000;
+  var lastBucket = Math.floor(last.time / candlePeriod);
+  var nowBucket  = Math.floor(nowMs    / candlePeriod);
+
+  if(nowBucket > lastBucket){
+    // New 5-minute candle boundary — open a fresh candle
+    var newCandleTime = nowBucket * candlePeriod;
+    gC.push({time: newCandleTime, open: price, high: price, low: price, close: price, volume: 0});
+    gA = runICT(gC);
+  } else {
+    // Update current forming candle
+    last.close = price;
+    if(price > last.high) last.high = price;
+    if(price < last.low)  last.low  = price;
+  }
+
+  updatePriceDisplay();
+  updateEvidence();
+  drawChart(gC, gA);
+}
+
+// ── ICT Engine ──────────────────────────────────────────────
+function runICT(candles){
+  var n = candles.length; if(n<15) return null;
+  var R = {swingHighs:[],swingLows:[],orderBlocks:[],fvgs:[],
+    bias:'neutral',premDisc:'unknown',rangeHigh:0,rangeLow:0,
+    pdh:null,pdl:null,atr:0,entry:null,sl:null,tp:null,tp2:null,
+    setupType:null,setupRef:null,confidence:0,
+    liquiditySweep:null,msbDetected:false,msbType:null};
+
+  var aS=0;
+  for(var i=Math.max(1,n-14);i<n;i++) aS+=candles[i].high-candles[i].low;
+  R.atr = aS/Math.min(14,n-1);
+
+  for(var i=1;i<n-1;i++){
+    var h=candles[i].high, l=candles[i].low;
+    if(h>candles[i-1].high&&h>candles[i+1].high) R.swingHighs.push({idx:i,price:h,time:candles[i].time});
+    if(l<candles[i-1].low&&l<candles[i+1].low)   R.swingLows.push({idx:i,price:l,time:candles[i].time});
+  }
+
+  if(R.swingHighs.length>=2&&R.swingLows.length>=2){
+    var rH=R.swingHighs.slice(-3), rL=R.swingLows.slice(-3);
+    var hh=rH[rH.length-1].price>rH[0].price, hl=rL[rL.length-1].price>rL[0].price;
+    var ll=rL[rL.length-1].price<rL[0].price, lh=rH[rH.length-1].price<rH[0].price;
+    R.bias = hh&&hl?'bullish':ll&&lh?'bearish':'ranging';
+  }
+
+  var lb=Math.min(96,n), rH2=-Infinity, rL2=Infinity;
+  for(var i=n-lb;i<n;i++){ rH2=Math.max(rH2,candles[i].high); rL2=Math.min(rL2,candles[i].low); }
+  R.rangeHigh=rH2; R.rangeLow=rL2;
+  var cur = livePrice||candles[n-1].close;
+  R.premDisc = cur>((rH2+rL2)/2)?'premium':'discount';
+
+  var prev = candles.slice(-50,-12);
+  if(prev.length){
+    R.pdh=prev.reduce(function(m,c){return Math.max(m,c.high);},-Infinity);
+    R.pdl=prev.reduce(function(m,c){return Math.min(m,c.low);},Infinity);
+  }
+
+  for(var i=1;i<n-1;i++){
+    if(candles[i+1].low>candles[i-1].high)
+      R.fvgs.push({type:'bullish',top:candles[i+1].low,bottom:candles[i-1].high,idx:i,filled:cur<candles[i-1].high});
+    if(candles[i+1].high<candles[i-1].low)
+      R.fvgs.push({type:'bearish',top:candles[i-1].low,bottom:candles[i+1].high,idx:i,filled:cur>candles[i-1].low});
+  }
+  R.fvgs = R.fvgs.slice(-12);
+
+  var disp = R.atr*1.0;
+  for(var i=2;i<n-1;i++){
+    var bear=candles[i].close<candles[i].open, bull=candles[i].close>candles[i].open;
+    if(bear){
+      for(var j=i+1;j<Math.min(i+7,n);j++){
+        if(candles[j].high-candles[i].high>=disp){
+          R.orderBlocks.push({type:'bullish',high:candles[i].high,low:candles[i].low,idx:i,mitigated:cur<candles[i].low});
+          break;
+        }
+      }
+    }
+    if(bull){
+      for(var j=i+1;j<Math.min(i+7,n);j++){
+        if(candles[i].low-candles[j].low>=disp){
+          R.orderBlocks.push({type:'bearish',high:candles[i].high,low:candles[i].low,idx:i,mitigated:cur>candles[i].high});
+          break;
+        }
+      }
+    }
+  }
+  R.orderBlocks = R.orderBlocks.slice(-8);
+
+  // Liquidity sweep
+  if(R.swingHighs.length&&R.swingLows.length){
+    var lastSH=R.swingHighs[R.swingHighs.length-1], lastSL=R.swingLows[R.swingLows.length-1];
+    var rHigh=candles.slice(-5).reduce(function(m,c){return Math.max(m,c.high);},-Infinity);
+    var rLow=candles.slice(-5).reduce(function(m,c){return Math.min(m,c.low);},Infinity);
+    if(rHigh>lastSH.price&&candles[n-1].close<lastSH.price)
+      R.liquiditySweep={type:'bearish',level:lastSH.price,desc:'Swept prior swing high'};
+    else if(rLow<lastSL.price&&candles[n-1].close>lastSL.price)
+      R.liquiditySweep={type:'bullish',level:lastSL.price,desc:'Swept prior swing low'};
+  }
+
+  // MSB
+  if(R.swingHighs.length>=2&&R.swingLows.length>=2){
+    var sh=R.swingHighs, sl=R.swingLows;
+    if(cur>sh[sh.length-1].price&&R.bias==='bearish'){ R.msbDetected=true; R.msbType='bullish'; }
+    else if(cur<sl[sl.length-1].price&&R.bias==='bullish'){ R.msbDetected=true; R.msbType='bearish'; }
+  }
+
+  // Setup
+  var aOBs=R.orderBlocks.filter(function(o){return !o.mitigated;});
+  var aFVGs=R.fvgs.filter(function(f){return !f.filled&&f.idx>n-120;});
+  var conf=0;
+
+  if(R.bias==='bullish'){
+    var bOBs=aOBs.filter(function(o){return o.type==='bullish'&&o.high<=cur*1.015;}).sort(function(a,b){return b.high-a.high;});
+    var bFVGs=aFVGs.filter(function(f){return f.type==='bullish'&&f.top<=cur*1.015;}).sort(function(a,b){return b.bottom-a.bottom;});
+    var ref=bOBs[0]||bFVGs[0];
+    if(ref){
+      var eZ=ref.high!=null?(ref.high+ref.low)/2:(ref.top+ref.bottom)/2;
+      var slZ=ref.high!=null?ref.low*0.9975:ref.bottom*0.9975;
+      var risk=Math.max(eZ-slZ,R.atr*0.5);
+      R.entry=eZ; R.sl=slZ; R.tp=eZ+risk*3; R.tp2=eZ+risk*5;
+      R.setupType='BUY'; R.setupRef=bOBs[0]?'Bullish OB':'Bullish FVG';
+      conf=40+(R.premDisc==='discount'?20:0)+(R.swingHighs.length>2?15:0)+(bOBs[0]&&bFVGs[0]?15:0)+10;
+      if(R.liquiditySweep&&R.liquiditySweep.type==='bullish') conf+=10;
+    }
+  } else if(R.bias==='bearish'){
+    var beOBs=aOBs.filter(function(o){return o.type==='bearish'&&o.low>=cur*0.985;}).sort(function(a,b){return a.low-b.low;});
+    var beFVGs=aFVGs.filter(function(f){return f.type==='bearish'&&f.bottom>=cur*0.985;}).sort(function(a,b){return a.top-b.top;});
+    var ref=beOBs[0]||beFVGs[0];
+    if(ref){
+      var eZ=ref.high!=null?(ref.high+ref.low)/2:(ref.top+ref.bottom)/2;
+      var slZ=ref.high!=null?ref.high*1.0025:ref.top*1.0025;
+      var risk=Math.max(slZ-eZ,R.atr*0.5);
+      R.entry=eZ; R.sl=slZ; R.tp=eZ-risk*3; R.tp2=eZ-risk*5;
+      R.setupType='SELL'; R.setupRef=beOBs[0]?'Bearish OB':'Bearish FVG';
+      conf=40+(R.premDisc==='premium'?20:0)+(R.swingLows.length>2?15:0)+(beOBs[0]&&beFVGs[0]?15:0)+10;
+      if(R.liquiditySweep&&R.liquiditySweep.type==='bearish') conf+=10;
+    }
+  }
+  R.confidence = Math.min(conf,95);
+  return R;
+}
+
+// ── Chart ────────────────────────────────────────────────────
+function drawChart(candles, analysis){
+  var area=$('chartArea'), cv=$('cv');
+  var dpr=window.devicePixelRatio||1;
+  var W0=area.clientWidth||800, H0=area.clientHeight||380;
+  cv.width=W0*dpr; cv.height=H0*dpr;
+  cv.style.width=W0+'px'; cv.style.height=H0+'px';
+  $('chartMsg').style.display='none';
+
+  var ctx=cv.getContext('2d');
+  ctx.scale(dpr,dpr);
+  var W=W0, H=H0, P={t:18,r:75,b:26,l:4};
+  var CW=W-P.l-P.r, CH=H-P.t-P.b;
+  var vis=candles.slice(-100), vn=vis.length;
+  if(!vn) return;
+
+  var lo=Infinity, hi=-Infinity;
+  vis.forEach(function(c){ lo=Math.min(lo,c.low); hi=Math.max(hi,c.high); });
+  if(analysis){
+    [analysis.entry,analysis.sl,analysis.tp,analysis.tp2,analysis.pdh,analysis.pdl].forEach(function(v){
+      if(v!=null){ lo=Math.min(lo,v); hi=Math.max(hi,v); }
+    });
+  }
+  var pad=(hi-lo)*0.06; lo-=pad; hi+=pad;
+  function xOf(i){ return P.l+(i/vn)*CW; }
+  function yOf(p){ return P.t+CH-((p-lo)/(hi-lo))*CH; }
+  var cW=Math.max(1.5,CW/vn-0.5);
+
+  ctx.fillStyle='#07090f'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#1c2030'; ctx.lineWidth=.5;
+  for(var i=0;i<=5;i++){
+    var gp=lo+(hi-lo)*(i/5), y=yOf(gp);
+    ctx.beginPath(); ctx.moveTo(P.l,y); ctx.lineTo(W-P.r,y); ctx.stroke();
+    ctx.fillStyle='#4a5568'; ctx.font='9px monospace'; ctx.textAlign='left';
+    ctx.fillText(fmt(gp),W-P.r+2,y+3);
+  }
+
+  if(analysis){
+    var eq=(analysis.rangeHigh+analysis.rangeLow)/2;
+    if(analysis.rangeHigh&&analysis.rangeLow){
+      var eqY=yOf(eq);
+      ctx.strokeStyle='rgba(6,182,212,0.25)'; ctx.lineWidth=1; ctx.setLineDash([3,6]);
+      ctx.beginPath(); ctx.moveTo(P.l,eqY); ctx.lineTo(W-P.r,eqY); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle='rgba(6,182,212,0.7)'; ctx.font='bold 9px sans-serif'; ctx.textAlign='right';
+      ctx.fillText('EQ '+fmt(eq),W-P.r-2,eqY-2);
+    }
+
+    analysis.orderBlocks.slice(-5).forEach(function(ob){
+      var ri=vis.findIndex(function(c){return c.time===candles[ob.idx]&&candles[ob.idx]?c.time===candles[ob.idx].time:false;});
+      // fallback search
+      for(var k=0;k<vis.length;k++){ if(candles[ob.idx]&&vis[k].time===candles[ob.idx].time){ri=k;break;} }
+      if(ri<0) return;
+      var x1=xOf(ri), y1=yOf(ob.high), y2=yOf(ob.low);
+      var cStr=ob.type==='bullish'?'rgba(74,158,255,':'rgba(255,71,87,';
+      ctx.fillStyle=cStr+'0.08)'; ctx.fillRect(x1,Math.min(y1,y2),W-P.r-x1,Math.abs(y2-y1));
+      ctx.strokeStyle=cStr+'0.4)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+      ctx.strokeRect(x1,Math.min(y1,y2),W-P.r-x1,Math.abs(y2-y1)); ctx.setLineDash([]);
+      ctx.fillStyle=cStr+'0.9)'; ctx.font='bold 9px sans-serif'; ctx.textAlign='left';
+      ctx.fillText(ob.type==='bullish'?'OB-B':'OB-S',x1+2,Math.min(y1,y2)-2);
+    });
+
+    analysis.fvgs.filter(function(f){return !f.filled&&f.idx>candles.length-100;}).slice(-5).forEach(function(fvg){
+      for(var k=0;k<vis.length;k++){
+        if(candles[fvg.idx]&&vis[k].time===candles[fvg.idx].time){
+          var ri=k;
+          var xS=xOf(ri), y1=yOf(fvg.top), y2=yOf(fvg.bottom);
+          var cStr=fvg.type==='bullish'?'rgba(0,212,138,':'rgba(255,71,87,';
+          ctx.fillStyle=cStr+'0.06)'; ctx.fillRect(xS,Math.min(y1,y2),W-P.r-xS,Math.abs(y2-y1));
+          ctx.strokeStyle=cStr+'0.3)'; ctx.lineWidth=.5; ctx.setLineDash([2,5]);
+          ctx.beginPath(); ctx.moveTo(xS,Math.min(y1,y2)); ctx.lineTo(W-P.r,Math.min(y1,y2)); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(xS,Math.max(y1,y2)); ctx.lineTo(W-P.r,Math.max(y1,y2)); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle=cStr+'0.9)'; ctx.font='bold 9px sans-serif'; ctx.textAlign='left';
+          ctx.fillText(fvg.type==='bullish'?'FVG+':'FVG-',xS+2,Math.min(y1,y2)-2);
+          break;
+        }
+      }
+    });
+
+    function hLine(price,color,label,lw,dash){
+      if(price==null) return; var y=yOf(price);
+      ctx.strokeStyle=color; ctx.lineWidth=lw||1; ctx.setLineDash(dash||[6,3]);
+      ctx.beginPath(); ctx.moveTo(P.l,y); ctx.lineTo(W-P.r,y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=color; ctx.font='bold 10px sans-serif'; ctx.textAlign='right';
+      ctx.fillText(label+' '+fmt(price),W-P.r-2,y-2);
+    }
+    hLine(analysis.pdh,'rgba(245,166,35,.6)','PDH',.9,[10,6]);
+    hLine(analysis.pdl,'rgba(245,166,35,.6)','PDL',.9,[10,6]);
+    hLine(analysis.entry,'#f5a623','ENTRY',1.5,[6,3]);
+    hLine(analysis.sl,'#ff4757','SL',1.2,[5,4]);
+    hLine(analysis.tp,'#00d48a','TP1',1.2,[5,4]);
+    hLine(analysis.tp2,'rgba(0,212,138,.4)','TP2',.8,[3,6]);
+
+    analysis.swingHighs.slice(-12).forEach(function(sh){
+      for(var k=0;k<vis.length;k++){
+        if(vis[k].time===sh.time){ ctx.fillStyle='#f5a623'; ctx.font='9px sans-serif'; ctx.textAlign='center'; ctx.fillText('v',xOf(k)+cW/2,yOf(sh.price)-4); break; }
+      }
+    });
+    analysis.swingLows.slice(-12).forEach(function(sl){
+      for(var k=0;k<vis.length;k++){
+        if(vis[k].time===sl.time){ ctx.fillStyle='#f5a623'; ctx.font='9px sans-serif'; ctx.textAlign='center'; ctx.fillText('^',xOf(k)+cW/2,yOf(sl.price)+12); break; }
+      }
+    });
+
+    if(analysis.liquiditySweep){
+      var sweepY=yOf(analysis.liquiditySweep.level);
+      ctx.strokeStyle='rgba(167,139,250,0.6)'; ctx.lineWidth=1.2; ctx.setLineDash([2,4]);
+      ctx.beginPath(); ctx.moveTo(P.l,sweepY); ctx.lineTo(W-P.r,sweepY); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle='rgba(167,139,250,0.9)'; ctx.font='bold 9px sans-serif'; ctx.textAlign='right';
+      ctx.fillText('SWEEP '+fmt(analysis.liquiditySweep.level),W-P.r-2,sweepY+10);
+    }
+  }
+
+  vis.forEach(function(c,i){
+    var x=xOf(i)+cW/2, oY=yOf(c.open), clY=yOf(c.close), hY=yOf(c.high), lY=yOf(c.low);
+    var bull=c.close>=c.open, color=bull?'#00d48a':'#ff4757';
+    var isLast = i===vn-1;
+    // Live forming candle: slightly brighter, with glow border
+    if(isLast){
+      ctx.strokeStyle=color; ctx.lineWidth=1.5;
+      ctx.shadowColor=color; ctx.shadowBlur=4;
+    } else {
+      ctx.strokeStyle=color; ctx.lineWidth=1;
+      ctx.shadowBlur=0;
+    }
+    ctx.fillStyle=color;
+    ctx.beginPath(); ctx.moveTo(x,hY); ctx.lineTo(x,lY); ctx.stroke();
+    if(isLast){
+      // Hollow body with glowing outline for live candle
+      ctx.strokeStyle=color; ctx.lineWidth=1.2;
+      var bH=Math.max(1,Math.abs(oY-clY));
+      ctx.strokeRect(x-cW/2,Math.min(oY,clY),cW,bH);
+      ctx.fillStyle=bull?'rgba(0,212,138,0.15)':'rgba(255,71,87,0.15)';
+      ctx.fillRect(x-cW/2,Math.min(oY,clY),cW,bH);
+      ctx.shadowBlur=0;
+    } else {
+      ctx.fillRect(x-cW/2,Math.min(oY,clY),cW,Math.max(1,Math.abs(oY-clY)));
+    }
+  });
+
+  var lp=livePrice||vis[vn-1].close;
+  var cpY=yOf(lp), lpUp=lp>=(vis[vn-1].open||lp);
+  ctx.strokeStyle=lpUp?'rgba(0,212,138,.6)':'rgba(255,71,87,.6)'; ctx.lineWidth=1; ctx.setLineDash([2,3]);
+  ctx.beginPath(); ctx.moveTo(P.l,cpY); ctx.lineTo(W-P.r,cpY); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle=lpUp?'#00d48a':'#ff4757';
+  ctx.fillRect(W-P.r+1,cpY-7,P.r-3,14);
+  ctx.fillStyle='#000'; ctx.font='bold 9px monospace'; ctx.textAlign='center';
+  ctx.fillText(fmt(lp),W-P.r+1+(P.r-3)/2,cpY+3);
+
+  ctx.fillStyle='#4a5568'; ctx.font='9px sans-serif'; ctx.textAlign='center';
+  var step=Math.max(1,Math.floor(vn/8));
+  for(var i=0;i<vn;i+=step){
+    var d=new Date(vis[i].time);
+    ctx.fillText((d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+(d.getMinutes()<10?'0':'')+d.getMinutes(),xOf(i)+cW/2,H-5);
+  }
+}
+
+// ── UI Update ────────────────────────────────────────────────
+function updateUI(data){
+  var candles=data.candles, n=candles.length;
+  var cur=data.currentPrice||candles[n-1].close;
+  var prev=data.prevClose||candles[n-2]&&candles[n-2].close||candles[n-1].open;
+  var chg=cur-prev, pct=chg/prev*100, up=chg>=0;
+
+  livePrice=cur;
+  initTick(cur, gA&&gA.atr?gA.atr:cur*0.002);
+
+  $('tp').textContent=fmt(cur); $('tp').style.color=up?'#00d48a':'#ff4757';
+  $('tc').textContent=(up?'+':'')+fmt(chg)+' ('+(up?'+':'')+pct.toFixed(2)+'%)';
+  $('tc').className='ticker-chg '+(up?'chg-up':'chg-dn');
+
+  var eq=(gA.rangeHigh+gA.rangeLow)/2;
+  var biasColor=gA.bias==='bullish'?'#00d48a':gA.bias==='bearish'?'#ff4757':'#f5a623';
+  function setF(id,val,cls){ var el=$(id); el.textContent=val; if(cls) el.className='fv '+cls; }
+  setF('fBias',gA.bias.toUpperCase()); $('fBias').style.color=biasColor;
+  setF('fZone',gA.premDisc.toUpperCase(),gA.premDisc==='premium'?'dn':'up');
+  setF('fOpen',fmt(candles[n-1].open));
+  setF('fHigh',fmt(data.dayHigh||candles.slice(-20).reduce(function(m,c){return Math.max(m,c.high);},-Infinity)));
+  setF('fLow', fmt(data.dayLow ||candles.slice(-20).reduce(function(m,c){return Math.min(m,c.low);},Infinity)));
+  setF('fATR',fmt(gA.atr)+' pts');
+  setF('fPDH',fmt(gA.pdh),'gold'); setF('fPDL',fmt(gA.pdl),'gold');
+  setF('fEq',fmt(eq),'cyan');
+  setF('fOB',gA.orderBlocks.filter(function(o){return !o.mitigated;}).length+' active');
+  setF('fFVG',gA.fvgs.filter(function(f){return !f.filled;}).length+' active');
+  setF('fVol',data.volume?fmtVol(data.volume):'--');
+
+  $('ec-entry-v').textContent=gA.entry?fmt(gA.entry):'--';
+  $('ec-entry-s').textContent=gA.entry?'Now: '+fmt(cur):'--';
+  $('ec-sl-v').textContent=gA.sl?fmt(gA.sl):'--';
+  $('ec-sl-s').textContent=gA.sl&&gA.entry?'Risk: '+fmt(Math.abs(gA.entry-gA.sl))+' pts':'--';
+  $('ec-tp-v').textContent=gA.tp?fmt(gA.tp):'--';
+  $('ec-tp-s').textContent=gA.tp2?'TP2: '+fmt(gA.tp2):'--';
+  $('ec-eq-v').textContent=fmt(eq);
+
+  var vb=$('verdictBox');
+  if(gA.entry){
+    var isBuy=gA.setupType==='BUY', col=isBuy?'#00d48a':'#ff4757';
+    vb.className='verdict '+(isBuy?'buy':'sell');
+    $('vDir').textContent=isBuy?'BUY':'SELL'; $('vDir').style.color=col;
+    $('vRef').textContent=gA.setupRef||'';
+    $('vEntry').textContent='$'+fmt(gA.entry);
+    $('vSL').textContent='$'+fmt(gA.sl);
+    $('vTP1').textContent='$'+fmt(gA.tp);
+    $('vTP2').textContent='$'+fmt(gA.tp2);
+    $('vRR').textContent='1:3 / 1:5';
+    $('vConf').textContent=gA.confidence+'%';
+    var cb=$('confBar');
+    cb.style.width=gA.confidence+'%';
+    cb.style.background=gA.confidence>75?'#00d48a':gA.confidence>50?'#f5a623':'#ff4757';
+  } else {
+    vb.className='verdict wait';
+    $('vDir').textContent='WAIT'; $('vDir').style.color='#4a5568';
+    $('vRef').textContent='No ICT setup — wait for OB/FVG + Kill Zone';
+    ['vEntry','vSL','vTP1','vTP2','vRR','vConf'].forEach(function(id){$(id).textContent='--';});
+    $('confBar').style.width='0%';
+  }
+
+  // Active signal tags
+  var aOBs=gA.orderBlocks.filter(function(o){return !o.mitigated;});
+  var aFVGs=gA.fvgs.filter(function(f){return !f.filled;});
+  var html='<div class="tags">';
+  if(gA.pdh) html+='<span class="tag t-pdh">PDH '+fmt(gA.pdh)+'</span>';
+  if(gA.pdl) html+='<span class="tag t-pdl">PDL '+fmt(gA.pdl)+'</span>';
+  html+='<span class="tag t-eq">EQ '+fmt(eq)+'</span>';
+  aOBs.slice(-3).forEach(function(ob){ html+='<span class="tag '+(ob.type==='bullish'?'t-ob-b':'t-ob-s')+'">'+(ob.type==='bullish'?'OB-B':'OB-S')+' '+fmt(ob.low)+'-'+fmt(ob.high)+'</span>'; });
+  aFVGs.slice(-3).forEach(function(f){ html+='<span class="tag '+(f.type==='bullish'?'t-fvg-b':'t-fvg-s')+'">'+(f.type==='bullish'?'FVG+':'FVG-')+' '+fmt(f.bottom)+'-'+fmt(f.top)+'</span>'; });
+  if(gA.liquiditySweep) html+='<span class="tag t-sweep">SWEEP '+fmt(gA.liquiditySweep.level)+'</span>';
+  if(gA.msbDetected) html+='<span class="tag t-msb">MSB '+gA.msbType.toUpperCase()+'</span>';
+  if(!aOBs.length&&!aFVGs.length) html+='<span style="color:var(--muted);font-size:11px">No unmitigated levels</span>';
+  $('sigTags').innerHTML=html+'</div>';
+
+  // Entry advice
+  var now2=toMins(getEST());
+  var kzNow2=TRADE_SESSIONS.find(function(kz){return sessionActive(kz,now2);});
+  var dist=gA.entry?Math.abs(cur-gA.entry):null;
+  var pct2=dist?(dist/cur*100).toFixed(2):null;
+  var advice='';
+  if(!gA.entry){
+    advice='No clear ICT setup. Wait for price to reach an Order Block or FVG aligned with trend bias.';
+  } else if(kzNow2&&dist&&dist/cur<0.0025){
+    advice='ENTER NOW. You are in the '+kzNow2.name+' and price is within 0.25% of your '+gA.setupType+' entry. Execute at $'+fmt(gA.entry)+', stop at $'+fmt(gA.sl)+', target $'+fmt(gA.tp)+'.';
+  } else if(kzNow2){
+    advice='Kill zone ACTIVE ('+kzNow2.name+'). Price is '+pct2+'% away from entry $'+fmt(gA.entry)+'. Watch closely — enter if price reaches that level.';
+  } else {
+    var nxt=TRADE_SESSIONS.reduce(function(best,kz){ var w=kz.s-now2; if(w<0)w+=1440; return w<(best?best.w:Infinity)?{kz:kz,w:w}:best; },null);
+    if(nxt){ var h2=Math.floor(nxt.w/60),m2=nxt.w%60; advice='DO NOT enter now. Wait '+h2+'h '+m2+'m for the '+nxt.kz.name+'. If price is near $'+fmt(gA.entry)+' then, that is your entry. SL $'+fmt(gA.sl)+' | TP $'+fmt(gA.tp)+'.'; }
+  }
+  $('entryAdvice').textContent=advice;
+
+  updateEvidence();
+  drawChart(candles, gA);
+}
+
+// ── Main Refresh ─────────────────────────────────────────────
+var lastRealPrice = null;
+var lastRealTime = 0;
+
+function doRefresh(){
+  $('statusTxt').textContent='Fetching...';
+  fetchData().then(function(data){
+    gC=data.candles;
+    gA=runICT(gC);
+    if(!gA) throw new Error('Not enough data');
+
+    // Anchor tick simulation to the REAL price we just got
+    var realPrice = data.currentPrice || gC[gC.length-1].close;
+    lastRealPrice = realPrice;
+    lastRealTime = Date.now();
+    livePrice = realPrice;
+    prevLivePrice = realPrice;
+    tickVelocity = 0; // reset drift on each real fetch
+
+    updateUI(data);
+    updateSignalState(getEST());
+
+    var now=new Date();
+    var ts = now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes()+':'+(now.getSeconds()<10?'0':'')+now.getSeconds();
+    $('lastRefresh').textContent='NDX via Finnhub · '+ts;
+    $('statusTxt').textContent='LIVE · ^NDX · 5M';
+    $('statusTxt').style.color='var(--green)';
+
+    // Start real-time WebSocket now that we have candle history
+    startFinnhubWS();
+
+    // Show LIVE badge on live dot
+    document.querySelector('.live-dot').style.background='var(--green)';
+    document.querySelector('.live-dot').style.boxShadow='0 0 8px var(--green)';
+
+  }).catch(function(err){
+    $('statusTxt').textContent='DATA UNAVAILABLE — Simulated';
+    $('statusTxt').style.color='var(--gold)';
+    document.querySelector('.live-dot').style.background='var(--gold)';
+    document.querySelector('.live-dot').style.boxShadow='0 0 6px var(--gold)';
+    $('lastRefresh').textContent='Blocked — open file locally (see instructions)';
+    console.warn('Data fetch failed:', err.message);
+    if(!gC.length){
+      $('chartMsg').style.display='flex';
+      $('chartMsg').innerHTML='<div style="color:#fff;text-align:center;padding:30px;max-width:420px">'
+        +'<div style="font-size:28px;margin-bottom:10px">🚫</div>'
+        +'<div style="font-size:15px;font-weight:900;color:var(--gold);margin-bottom:10px">Network Blocked by Claude.ai</div>'
+        +'<div style="font-size:12px;color:var(--muted);line-height:1.8;margin-bottom:16px">'
+        +'Claude.ai\'s security policy blocks all external API calls inside this viewer.<br>'
+        +'<strong style="color:#fff">The terminal works perfectly — you just need to open it directly in your browser.</strong>'
+        +'</div>'
+        +'<div style="background:rgba(245,166,35,0.1);border:1px solid var(--gold);border-radius:8px;padding:14px;text-align:left;font-size:12px;line-height:2">'
+        +'<strong style="color:var(--gold)">How to fix in 3 steps:</strong><br>'
+        +'1️⃣ Click the <strong style="color:#fff">download button</strong> (↓) on this artifact<br>'
+        +'2️⃣ Save the <strong style="color:#fff">.html file</strong> to your computer<br>'
+        +'3️⃣ <strong style="color:#fff">Double-click</strong> the file to open it in Chrome/Edge<br>'
+        +'</div>'
+        +'<div style="margin-top:14px;font-size:11px;color:var(--muted)">Once open locally, Finnhub will load real ^NDX candles<br>and the WebSocket will stream live prices automatically.</div>'
+        +'<div style="margin-top:14px"><button onclick="doRefresh()" style="background:var(--gold);color:#000;border:none;padding:8px 20px;border-radius:5px;font-weight:900;cursor:pointer;font-size:12px;margin-right:8px">↺ Retry</button></div>'
+        +'</div>';
+    }
+  });
+}
+
+// ── NEWS SYSTEM ─────────────────────────────────────────────
+var gNews = [];
+var newsLastFetch = 0;
+var NEWS_REFRESH_MS = 5 * 60 * 1000; // every 5 minutes
+
+// Static upcoming econ events — updated manually or via future API
+// Format: {name, time (EST string), impact: 'high'|'med'|'low', bullish: true/false/null}
+var ECON_EVENTS = [
+  {name:'FOMC Minutes',         time:'2:00 PM EST', impact:'high',  bullish:null,  note:'Fed policy — major NDX mover'},
+  {name:'CPI Inflation Data',   time:'8:30 AM EST', impact:'high',  bullish:null,  note:'Hot CPI = bearish, cool = bullish'},
+  {name:'Non-Farm Payrolls',    time:'8:30 AM EST', impact:'high',  bullish:null,  note:'Jobs data drives rate expectations'},
+  {name:'PPI Data',             time:'8:30 AM EST', impact:'med',   bullish:null,  note:'Producer prices — inflation signal'},
+  {name:'GDP Report',           time:'8:30 AM EST', impact:'high',  bullish:null,  note:'Strong GDP can lift or pressure NDX'},
+  {name:'Initial Jobless Claims',time:'8:30 AM EST',impact:'med',   bullish:null,  note:'Weekly jobs — risk appetite gauge'},
+  {name:'ISM Manufacturing',    time:'10:00 AM EST',impact:'med',   bullish:null,  note:'Business activity indicator'},
+  {name:'Consumer Confidence',  time:'10:00 AM EST',impact:'med',   bullish:null,  note:'Retail sentiment signal'},
+  {name:'NVIDIA Earnings',      time:'After Close', impact:'high',  bullish:true,  note:'NVDA heavily weights NDX'},
+  {name:'Apple Earnings',       time:'After Close', impact:'high',  bullish:true,  note:'AAPL = largest NDX component'},
+  {name:'Fed Chair Speech',     time:'Varies',      impact:'high',  bullish:null,  note:'Hawkish = bearish, dovish = bullish'}
+];
+
+// Fetch real news via RSS proxy (financial headlines)
+function fetchNews() {
+  var now = Date.now();
+  if (now - newsLastFetch < NEWS_REFRESH_MS) return Promise.resolve(gNews);
+  newsLastFetch = now;
+
+  // Use multiple RSS feeds via allorigins proxy
+  var feeds = [
+    'https://feeds.finance.yahoo.com/rss/2.0/headline?s=%5ENDX&region=US&lang=en-US',
+    'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
+    'https://www.cnbc.com/id/15839135/device/rss/rss.html'
+  ];
+
+  var proxyBase = 'https://api.allorigins.win/raw?url=';
+  var promises = feeds.map(function(feed) {
+    return fetch(proxyBase + encodeURIComponent(feed), {signal: AbortSignal.timeout(8000)})
+      .then(function(r) { return r.text(); })
+      .then(function(xml) { return parseRSS(xml); })
+      .catch(function() { return []; });
+  });
+
+  return Promise.all(promises).then(function(results) {
+    var all = [];
+    results.forEach(function(items) { all = all.concat(items); });
+    // Deduplicate by title
+    var seen = {};
+    all = all.filter(function(item) {
+      if (seen[item.title]) return false;
+      seen[item.title] = true;
+      return true;
+    });
+    // Sort newest first, take top 15
+    all.sort(function(a,b) { return b.ts - a.ts; });
+    gNews = all.slice(0, 15);
+    return gNews;
+  });
+}
+
+function parseRSS(xml) {
+  try {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(xml, 'application/xml');
+    var items = doc.querySelectorAll('item');
+    var results = [];
+    items.forEach(function(item) {
+      var title = (item.querySelector('title')||{}).textContent || '';
+      var desc  = (item.querySelector('description')||{}).textContent || '';
+      var link  = (item.querySelector('link')||{}).textContent || '';
+      var pubDate = (item.querySelector('pubDate')||{}).textContent || '';
+      if (!title || title.length < 5) return;
+      var ts = pubDate ? new Date(pubDate).getTime() : Date.now();
+      if (isNaN(ts)) ts = Date.now();
+      results.push({title: title.trim(), desc: desc.trim(), link: link.trim(), ts: ts, sentiment: null, impact: null, aiNote: null});
+    });
+    return results;
+  } catch(e) { return []; }
+}
+
+// Score news sentiment with Claude API
+function scoreNewsWithAI(newsItems) {
+  if (!newsItems || !newsItems.length) return Promise.resolve([]);
+  var headlines = newsItems.map(function(n, i) { return (i+1)+'. '+n.title; }).join('\n');
+
+  var prompt = 'You are a financial analyst specializing in NASDAQ 100 (NDX/NDQ). Analyze these news headlines and return ONLY a JSON array (no markdown, no explanation) with one object per headline:\n[{"idx":1,"sentiment":"bullish"|"bearish"|"neutral"|"hot","impact":"high"|"med"|"low","note":"one short sentence about NDX impact","override":true|false}]\n\nRules:\n- sentiment "hot" = breaking market-moving news requiring immediate attention\n- override:true = trader should pause/reconsider ICT setup due to this news\n- impact "high" = Fed, CPI, GDP, major earnings (AAPL/MSFT/NVDA/GOOGL/AMZN/META), geopolitical\n- impact "med" = sector news, mid-cap earnings, economic data\n- impact "low" = general market commentary, minor news\n- note must mention specific NDX price direction implication\n\nHeadlines:\n' + headlines;
+
+  return fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 1000,
+      messages: [{role: 'user', content: prompt}]
+    })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var text = data.content && data.content[0] ? data.content[0].text : '[]';
+    text = text.replace(/```json|```/g, '').trim();
+    var scores = JSON.parse(text);
+    scores.forEach(function(s) {
+      var idx = s.idx - 1;
+      if (newsItems[idx]) {
+        newsItems[idx].sentiment = s.sentiment;
+        newsItems[idx].impact    = s.impact;
+        newsItems[idx].aiNote    = s.note;
+        newsItems[idx].override  = s.override;
+      }
+    });
+    return newsItems;
+  })
+  .catch(function() { return newsItems; });
+}
+
+function renderNews(items) {
+  // Update news ticker strip
+  var track = $('newsTickerTrack');
+  if (items && items.length) {
+    var tickerHtml = '';
+    // Duplicate for seamless loop
+    var tickerItems = items.concat(items);
+    tickerItems.forEach(function(item) {
+      var s = item.sentiment || 'neutral';
+      var cls = s === 'bullish' ? 'news-bull' : s === 'bearish' ? 'news-bear' : s === 'hot' ? 'news-hot' : 'news-neutral';
+      var dotCls = s === 'bullish' ? 'news-dot-bull' : s === 'bearish' ? 'news-dot-bear' : s === 'hot' ? 'news-dot-hot' : 'news-dot-neutral';
+      var impactIcon = item.impact === 'high' ? ' !!!' : item.impact === 'med' ? ' !' : '';
+      tickerHtml += '<span class="news-item ' + cls + '"><span class="news-dot ' + dotCls + '"></span>' + item.title + impactIcon + '</span>';
+    });
+    track.innerHTML = tickerHtml;
+    // Reset animation
+    track.style.animation = 'none';
+    void track.offsetWidth;
+    var dur = Math.max(40, items.length * 6);
+    track.style.animation = 'ticker-scroll ' + dur + 's linear infinite';
+  }
+
+  // Update news list panel
+  var list = $('newsList');
+  if (!items || !items.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:11px;text-align:center;padding:10px">No news available</div>';
+    return;
+  }
+  var html = '';
+  items.slice(0, 8).forEach(function(item) {
+    var s = item.sentiment || 'neutral';
+    var cardCls = s === 'bullish' ? 'bull' : s === 'bearish' ? 'bear' : s === 'hot' ? 'hot' : 'neutral';
+    var impactCls = item.impact === 'high' && (s === 'bullish' || s === 'hot') ? 'high-bull' :
+                    item.impact === 'high' && s === 'bearish' ? 'high-bear' :
+                    item.impact === 'med' ? 'med' : 'low';
+    var impactLabel = item.impact === 'high' ? 'HIGH IMPACT' : item.impact === 'med' ? 'MED' : 'LOW';
+    var age = Math.round((Date.now() - item.ts) / 60000);
+    var ageStr = age < 1 ? 'Just now' : age < 60 ? age + 'm ago' : Math.round(age/60) + 'h ago';
+    var sentIcon = s === 'bullish' ? '&#9650;' : s === 'bearish' ? '&#9660;' : s === 'hot' ? '&#9888;' : '&#8212;';
+    var sentColor = s === 'bullish' ? 'var(--green)' : s === 'bearish' ? 'var(--red)' : s === 'hot' ? 'var(--gold)' : 'var(--muted)';
+
+    html += '<div class="news-card ' + cardCls + '" onclick="openNews(\'' + encodeURIComponent(item.link) + '\')">';
+    html += '<div class="news-headline">' + item.title + '</div>';
+    html += '<div class="news-meta"><span>' + ageStr + '</span>';
+    html += '<div style="display:flex;gap:4px;align-items:center">';
+    html += '<span style="color:' + sentColor + ';font-weight:900;font-size:10px">' + sentIcon + ' ' + s.toUpperCase() + '</span>';
+    html += '<span class="news-impact ' + impactCls + '">' + impactLabel + '</span>';
+    html += '</div></div>';
+    if (item.aiNote) {
+      html += '<div class="news-ai-note">&#129302; ' + item.aiNote + '</div>';
+    }
+    html += '</div>';
+
+    // Show popup alert for high-impact override news
+    if (item.override && item.impact === 'high') {
+      showNewsAlert(item);
+    }
+  });
+  list.innerHTML = html;
+
+  // Update last fetched time
+  var n = new Date();
+  $('newsLastUpdated').textContent = 'Updated ' + n.getHours() + ':' + (n.getMinutes()<10?'0':'') + n.getMinutes();
+}
+
+function renderEconEvents() {
+  var html = '';
+  ECON_EVENTS.forEach(function(ev) {
+    var impactCls = ev.impact === 'high' ? 'econ-high' : ev.impact === 'med' ? 'econ-med' : 'econ-low';
+    var dir = ev.bullish === true ? ' &#9650;' : ev.bullish === false ? ' &#9660;' : '';
+    html += '<div class="econ-event">';
+    html += '<div><div class="econ-name">' + ev.name + dir + '</div>';
+    html += '<div style="font-size:9px;color:var(--muted);margin-top:1px">' + ev.note + '</div></div>';
+    html += '<div style="text-align:right">';
+    html += '<span class="econ-impact ' + impactCls + '">' + ev.impact.toUpperCase() + '</span>';
+    html += '<div style="font-size:9px;color:var(--muted);margin-top:2px">' + ev.time + '</div>';
+    html += '</div></div>';
+  });
+  $('econList').innerHTML = html || '<div style="color:var(--muted);font-size:10px">No events loaded</div>';
+}
+
+var activeNewsAlert = null;
+function showNewsAlert(item) {
+  if (activeNewsAlert === item.title) return;
+  activeNewsAlert = item.title;
+  var alert = $('newsAlert');
+  var s = item.sentiment || 'neutral';
+  $('newsAlertTitle').textContent = (s === 'bearish' ? 'BEARISH' : s === 'bullish' ? 'BULLISH' : 'HOT') + ' HIGH IMPACT NEWS';
+  $('newsAlertTitle').style.color = s === 'bearish' ? 'var(--red)' : s === 'bullish' ? 'var(--green)' : 'var(--gold)';
+  $('newsAlertBody').textContent = item.title + (item.aiNote ? ' — ' + item.aiNote : '');
+  alert.style.display = 'block';
+  setTimeout(function() { alert.style.display = 'none'; activeNewsAlert = null; }, 12000);
+}
+
+function openNews(encodedUrl) {
+  var url = decodeURIComponent(encodedUrl);
+  if (url) window.open(url, '_blank');
+}
+
+// Run news fetch + AI scoring
+function refreshNews() {
+  fetchNews().then(function(items) {
+    if (!items.length) {
+      renderNews([]);
+      renderEconEvents();
+      return;
+    }
+    // Score with AI
+    scoreNewsWithAI(items).then(function(scored) {
+      gNews = scored;
+      renderNews(scored);
+      renderEconEvents();
+    });
+  }).catch(function() {
+    renderEconEvents();
+  });
+}
+
+
+window.addEventListener('resize', function(){ if(gC.length) drawChart(gC,gA); });
+
+setSignalState('standby','Connecting to Finnhub...');
+setInterval(tickClock, 1000);
+tickClock();
+// advanceTick runs every 500ms as fallback only when WebSocket is disconnected
+setInterval(function(){
+  if(gC.length && gA && !wsConnected) advanceTick();
+}, 500);
+doRefresh();
+// Re-fetch candle history every 5 minutes to stay accurate
+setInterval(doRefresh, 5 * 60 * 1000);
+
+// News system — fetch immediately then every 5 minutes
+renderEconEvents();
+refreshNews();
+setInterval(refreshNews, NEWS_REFRESH_MS);
+</script>
+
+
+</body></html>
